@@ -62,8 +62,13 @@ Die Basisinstallation erhält damit **keine** GitHub-Oberfläche. Sie verwendet 
 
 Eine statische Statusdatei oder GitHub Pages allein kann keine vertraulichen Meldungen sicher speichern und keine geschützte Betreiber-Inbox bereitstellen. Dafür werden ein Backend, Zugriffsschutz, Eingabevalidierung, Spam-Schutz, Datensparsamkeit und festgelegte Löschfristen benötigt. Diagnoseinformationen dürfen nur nach Anzeige des Inhalts und ausdrücklicher Bestätigung gesendet werden.
 
-Die vollständigen Anforderungen stehen in [SERVICE-UND-FEEDBACKSTELLE.md](SERVICE-UND-FEEDBACKSTELLE.md). **Die zentrale Backend-API, Meldungsübermittlung und Betreiberoberfläche sind noch nicht implementiert.**
+Die vollständigen Anforderungen stehen in [SERVICE-UND-FEEDBACKSTELLE.md](SERVICE-UND-FEEDBACKSTELLE.md). **Die Backend-Grundlage und die App-Maske sind vorhanden; der öffentliche Hostingbetrieb und die vollständige Produktivintegration fehlen noch.**
 
 ## Installer und aktueller Stand
 
 Der Inno-Setup-Installer enthält genau zwei Auswahlmöglichkeiten: **Basisinstallation** und **Standardinstallation**. Er installiert die Anwendung systemweit in den Programmordner und schreibt die gewählte Variante in eine lokale `variant.txt`. Die automatische Update-Prüfung lädt keine Programmdateien herunter und installiert keine Updates selbstständig. Der Installer wird über GitHub Actions gebaut; ein veröffentlichter Release muss zusätzlich angelegt werden.
+
+
+## Wartungsstatus und Video-/Kamerastreams
+
+Wartungsstatus darf die Oberfläche informieren und das Starten bestimmter TV-Playlist-Funktionen begrenzen, aber niemals einen bereits laufenden Mediaplayer zwangsweise stoppen. Eine künftige eingebettete Kamera-/Überwachungskameraübertragung muss in einem eigenen Funktionsbereich mit eigener Wiedergabesitzung laufen und von `playback`-/`all`-Sperren unabhängig bleiben. Die Kamera-Schnittstelle ist noch nicht implementiert; diese Trennung ist für ihre spätere Umsetzung verbindlich.
