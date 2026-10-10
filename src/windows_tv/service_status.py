@@ -47,6 +47,7 @@ def fetch_service_status(timeout: float = 4.0) -> dict:
         "title": str(data.get("title", ""))[:160],
         "message": str(data.get("message", ""))[:2000],
         "locked_features": list(dict.fromkeys(locks)),
+        "locks_explicit": "locked_features" in data,
         "starts_at": str(data.get("starts_at", ""))[:80],
         "ends_at": str(data.get("ends_at", ""))[:80],
         "updated_at": str(data.get("updated_at", ""))[:80],
