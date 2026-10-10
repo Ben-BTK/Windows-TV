@@ -83,3 +83,8 @@ Früher Entwicklungsstand. Noch kein fertiges Installationspaket und keine verbi
 ### Wartung und spätere Kamerastreams
 
 Wartungsanzeigen dürfen die Video-/Kamerastream-Schnittstelle nicht blockieren. Eine spätere Kameraübertragung wird separat vom TV-Playlist-Wiedergabepfad umgesetzt; der zentrale Wartungsstatus darf keine aktive Medienwiedergabe pauschal stoppen. Die dedizierte Kamerafunktion ist noch nicht implementiert. Anforderungen an öffentliche Repositorys, private Daten und Kamerasicherheit stehen in [docs/PRIVATSPHAERE-UND-KAMERA.md](docs/PRIVATSPHAERE-UND-KAMERA.md).
+
+
+## Geschützte externe Testfreigabe
+
+Die Anforderungen für eine spätere, passwort-/codegeschützte Testfreigabe der TV-Stream-Funktion sind in [docs/TESTFREIGABE.md](docs/TESTFREIGABE.md) dokumentiert. Der Freigabecode-Workflow und der öffentliche Freigabedienst sind noch nicht implementiert; ein Testpaket darf diesen Stand nicht als bereits aktiv darstellen.
