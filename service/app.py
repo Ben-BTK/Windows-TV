@@ -254,3 +254,55 @@ async def update_status(request: Request, _user: str = Depends(require_admin)) -
             (mode, title, message, json.dumps(locks), now_iso()),
         )
     return RedirectResponse("/admin", status_code=303)
+
+
+# FlemmauTV provider catalogue.
+# This is an API/data contract for the app and internal planning, not a public website
+# and not a claim that these services are already technically integrated.
+PROVIDER_CATALOG = [
+    {"id": "m3u-m3u8", "name": "M3U/M3U8-Quellen", "category": "playlist", "access": "user_supplied", "status": "integrated", "integration": "playlist_import", "notes": "Unterstützte Senderlisten per URL oder lokaler Playlist-Datei."},
+    {"id": "free-tv-sources", "name": "Kostenlose legale TV-Quellen", "category": "live_tv", "access": "free", "status": "planned", "integration": "source_adapter", "notes": "Nur kompatible Quellen mit geklärten Nutzungsrechten."},
+    {"id": "epg", "name": "EPG- und Programmdaten", "category": "program_data", "access": "mixed", "status": "planned", "integration": "epg_adapter", "notes": "Abhängig von Verfügbarkeit, Format und Nutzungsrechten."},
+    {"id": "disney-plus", "name": "Disney+", "category": "streaming", "access": "paid", "status": "planned", "integration": "official_app_or_api", "notes": "Noch nicht integriert; nur offizielle/erlaubte Zugriffswege, Abo erforderlich."},
+    {"id": "netflix", "name": "Netflix", "category": "streaming", "access": "paid", "status": "planned", "integration": "official_app_or_api", "notes": "Noch nicht integriert; nur offizielle/erlaubte Zugriffswege, Abo erforderlich."},
+    {"id": "sky", "name": "Sky", "category": "streaming", "access": "paid", "status": "planned", "integration": "official_app_or_api", "notes": "Noch nicht integriert; Angebot und Zugang je nach Region/Abo."},
+    {"id": "magenta-tv", "name": "MagentaTV", "category": "tv_service", "access": "paid_or_bundle", "status": "planned", "integration": "official_app_or_api", "notes": "Noch nicht integriert; nur offizielle/erlaubte Zugriffswege."},
+    {"id": "joyn", "name": "Joyn", "category": "streaming", "access": "mixed", "status": "planned", "integration": "official_app_or_api", "notes": "Noch nicht integriert; kostenloses und kostenpflichtiges Angebot unterscheiden."},
+    {"id": "apple-tv", "name": "Apple TV", "category": "streaming", "access": "paid_or_rental", "status": "planned", "integration": "official_app_or_api", "notes": "Noch nicht integriert; Abo/Kauf/Leihe je nach Inhalt."},
+    {"id": "ard", "name": "ARD / Das Erste", "category": "broadcaster", "access": "free", "status": "planned", "integration": "official_app_or_stream", "notes": "Anbindung erst nach technischer und rechtlicher Prüfung."},
+    {"id": "zdf", "name": "ZDF", "category": "broadcaster", "access": "free", "status": "planned", "integration": "official_app_or_stream", "notes": "Anbindung erst nach technischer und rechtlicher Prüfung."},
+    {"id": "arte", "name": "ARTE", "category": "broadcaster", "access": "free", "status": "planned", "integration": "official_app_or_stream", "notes": "Anbindung erst nach technischer und rechtlicher Prüfung."},
+    {"id": "3sat", "name": "3sat", "category": "broadcaster", "access": "free", "status": "planned", "integration": "official_app_or_stream", "notes": "Anbindung erst nach technischer und rechtlicher Prüfung."},
+    {"id": "regional-local", "name": "Regionale und lokale Sender", "category": "broadcaster", "access": "mixed", "status": "planned", "integration": "source_adapter", "notes": "Nur verfügbare, kompatible und rechtmäßig nutzbare Quellen."},
+]
+PROVIDER_STATUSES = {"planned", "in_review", "integrated", "unavailable"}
+
+
+@app.get("/api/providers")
+def list_providers(category: str | None = None, status: str | None = None) -> dict:
+    """Machine-readable provider catalogue; this endpoint does not provide playback."""
+    if category and category not in {p["category"] for p in PROVIDER_CATALOG}:
+        raise HTTPException(status_code=400, detail="Unbekannte Anbieter-Kategorie.")
+    if status and status not in PROVIDER_STATUSES:
+        raise HTTPException(status_code=400, detail="Ungültiger Anbieterstatus.")
+    items = [
+        p for p in PROVIDER_CATALOG
+        if (not category or p["category"] == category) and (not status or p["status"] == status)
+    ]
+    return {
+        "product": "FlemmauTV",
+        "catalog_version": 1,
+        "is_playback_endpoint": False,
+        "items": items,
+        "count": len(items),
+        "notice": "Ein Katalogeintrag bedeutet nicht, dass der Anbieter bereits integriert oder abspielbar ist.",
+    }
+
+
+@app.get("/api/providers/{provider_id}")
+def get_provider(provider_id: str) -> dict:
+    """Return one provider's current planning/integration metadata."""
+    provider = next((p for p in PROVIDER_CATALOG if p["id"] == provider_id), None)
+    if provider is None:
+        raise HTTPException(status_code=404, detail="Anbieter nicht gefunden.")
+    return {"product": "FlemmauTV", "is_playback_endpoint": False, "provider": provider}
