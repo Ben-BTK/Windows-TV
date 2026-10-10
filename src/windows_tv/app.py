@@ -348,7 +348,7 @@ class MainWindow(QMainWindow):
     def _apply_service_status(self, data: dict) -> None:
         mode = data["mode"]
         locks = set(data["locked_features"])
-        if not locks:
+        if not data.get("locks_explicit", False):
             if mode in {"maintenance", "acute_outage"}:
                 locks = {"all"}
             elif mode == "scheduled_maintenance":
