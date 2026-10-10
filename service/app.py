@@ -160,7 +160,7 @@ def submit_report(payload: ReportIn, request: Request) -> dict:
         raise HTTPException(status_code=422, detail="Ungültige Installationsvariante.")
     report_id = "WT-" + uuid4().hex[:10].upper()
     created = now_iso()
-    with connect_db() as db:
+    with db_session() as db:
         db.execute("""
             INSERT INTO reports
             (id, report_type, subject, description, severity, affected_feature,
@@ -192,7 +192,7 @@ small{{color:#bdc7d3}}.row{{display:flex;gap:.5rem;flex-wrap:wrap}}label{{displa
 
 @app.get("/admin", response_class=HTMLResponse)
 def admin_home(request: Request, _user: str = Depends(require_admin)) -> HTMLResponse:
-    with connect_db() as db:
+    with db_session() as db:
         reports = db.execute("SELECT * FROM reports ORDER BY CASE status WHEN 'new' THEN 0 WHEN 'in_progress' THEN 1 ELSE 2 END, created_at DESC LIMIT 100").fetchall()
         status = db.execute("SELECT * FROM service_status WHERE singleton = 1").fetchone()
     import json
@@ -230,7 +230,7 @@ async def update_report(report_id: str, request: Request, _user: str = Depends(r
     note = form.get("internal_note", [""])[0][:4000]
     if status not in ALLOWED_STATUSES:
         raise HTTPException(status_code=422, detail="Ungültiger Meldestatus.")
-    with connect_db() as db:
+    with db_session() as db:
         cur = db.execute("UPDATE reports SET status=?, internal_note=?, updated_at=? WHERE id=?", (status, note, now_iso(), report_id))
         if cur.rowcount == 0:
             raise HTTPException(status_code=404, detail="Meldung nicht gefunden.")
@@ -248,7 +248,7 @@ async def update_status(request: Request, _user: str = Depends(require_admin)) -
     if mode not in ALLOWED_MODES or any(lock not in ALLOWED_LOCKS for lock in locks) or not title:
         raise HTTPException(status_code=422, detail="Ungültige Statusdaten.")
     import json
-    with connect_db() as db:
+    with db_session() as db:
         db.execute(
             "UPDATE service_status SET mode=?, title=?, message=?, locked_features=?, updated_at=? WHERE singleton=1",
             (mode, title, message, json.dumps(locks), now_iso()),
