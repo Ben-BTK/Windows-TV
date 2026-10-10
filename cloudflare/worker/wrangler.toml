@@ -5,7 +5,7 @@ compatibility_date = "2026-10-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "flemmau-tv-service"
-database_id = "REPLACE_WITH_CREATED_D1_DATABASE_ID"
+database_id = "fd965be5-3b12-4fba-83af-e1607c1a6bd6"
 migrations_dir = "migrations"
 
 [observability]
