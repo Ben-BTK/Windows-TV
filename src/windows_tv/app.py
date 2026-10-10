@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from PySide6.QtCore import Qt, QUrl, QTimer, QSettings
 from PySide6.QtWidgets import (
-    QApplication, QCheckBox, QComboBox, QDialog, QFileDialog, QFormLayout,
+    QApplication, QComboBox, QDialog, QFileDialog, QFormLayout,
     QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMainWindow,
     QMessageBox, QPushButton, QSplitter, QTextEdit, QVBoxLayout, QWidget
 )
