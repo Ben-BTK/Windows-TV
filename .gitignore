@@ -9,3 +9,15 @@ dist/
 .mypy_cache/
 .DS_Store
 Thumbs.db
+
+# Local secrets, reports, camera/stream configuration and service data
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite3
+*.db
+*.log
+local-data/
+private-data/
+camera-config/
