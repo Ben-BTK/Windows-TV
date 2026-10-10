@@ -52,6 +52,10 @@ Die Basisinstallation soll diese Service-Schnittstelle erreichen können, ohne e
 
 **Wichtig:** Der Backend-Code ist vorhanden, aber noch nicht auf einem öffentlichen Host bereitgestellt und noch nicht produktiv verbunden. Vor einem Live-Betrieb fehlen Hosting/HTTPS-Domain, produktive Sicherheitsprüfung und Datenschutz-/Löschangaben. Die Anleitung steht in [service/README.md](service/README.md); Architektur und Variantenregeln stehen in [docs/SERVICE-UND-FEEDBACKSTELLE.md](docs/SERVICE-UND-FEEDBACKSTELLE.md). Die geplante geschlossene Testfreigabe mit Freischaltungsanfrage und einmaligem Code ist in [docs/TESTZUGANG-UND-FREISCHALTUNG.md](docs/TESTZUGANG-UND-FREISCHALTUNG.md) beschrieben; der vollständige Ablauf ist noch nicht live.
 
+## Anbieter-Katalog-Schnittstelle
+
+Die erste maschinenlesbare Anbieterschnittstelle ist unter `GET /api/providers` und `GET /api/providers/{provider_id}` im Backend angelegt. Sie dient der App und internen Planung; dafür ist keine Homepage vorgesehen. Sie listet vorhandene und geplante Quellen mit einem klaren Status. Disney+, Netflix, Sky, MagentaTV, Joyn und Apple TV sind derzeit nur als geplant gekennzeichnet und noch nicht integriert. Details: [docs/ANBIETER-KATALOG-API.md](docs/ANBIETER-KATALOG-API.md).
+
 ## Entwicklung
 
 Voraussetzung: Python 3.11 oder neuer.
