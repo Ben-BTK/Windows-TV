@@ -73,4 +73,11 @@ Nur berechtigte Betreiber dürfen den Status ändern oder Meldungen verwalten. D
 
 ## Aktueller Umsetzungsstand
 
-Dieses Dokument legt die Anforderungen fest. Die vollständige zentrale Backend- und Betreiberoberfläche sowie die Übermittlung von Feedback und Störungsmeldungen sind **noch nicht implementiert**. Die bestehende Statusdatei bleibt vorerst ein einfacher Prototyp und darf nicht als vollständige Wartungsstelle bezeichnet werden.
+## Umsetzungsstand (10.10.2026)
+
+- Backend-Grundlage im Ordner `service/`: `GET /api/status`, `POST /api/reports`, Referenznummern, SQLite-Speicherung, geschützter Betreiberbereich mit Meldungsstatus/interner Notiz und Bearbeitung des öffentlichen Dienststatus.
+- App: gemeinsame Hilfe-/Feedback-Maske in beiden Varianten. Die Übermittlung ist deaktiviert, solange `WINDOWS_TV_SERVICE_URL` nicht auf einen echten HTTPS-Host zeigt.
+- Die Standardinstallation behält ihre zusätzliche GitHub-Update-Oberfläche; die Basisinstallation erhält keine GitHub-UI.
+- CI wurde um API-Tests ergänzt.
+
+**Noch offen:** Backend auf einem öffentlichen Host bereitstellen, HTTPS und Reverse-Proxy-Rate-Limits einrichten, Datenschutz-/Löschregeln festlegen, Sicherheit prüfen und anschließend die reale Service-URL für die App konfigurieren. Bis dahin ist es noch keine produktiv erreichbare Live-Meldestelle. Die Bereitstellungsanleitung liegt in [`service/README.md`](../service/README.md).
