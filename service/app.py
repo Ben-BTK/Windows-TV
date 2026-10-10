@@ -28,6 +28,9 @@ ALLOWED_MODES = {"normal", "limited_service", "scheduled_maintenance", "maintena
 ALLOWED_LOCKS = {"all", "playback", "source_import", "favorites"}
 security = HTTPBasic(auto_error=False)
 app = FastAPI(title=APP_TITLE, docs_url=None, redoc_url=None)
+
+from registration_api import router as registration_router
+app.include_router(registration_router)
 _rate_buckets: dict[str, list[float]] = {}
 
 
