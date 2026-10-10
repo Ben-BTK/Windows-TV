@@ -36,7 +36,7 @@ Die zentrale Service-Komponente für **beide** Installationsvarianten ist jetzt 
 
 Die Basisinstallation soll diese Service-Schnittstelle erreichen können, ohne eine integrierte öffentliche GitHub-Oberfläche zu erhalten. Die Standardinstallation darf zusätzlich die GitHub-Schnittstelle für Projektinformationen und Update-Prüfungen nutzen.
 
-**Wichtig:** Der Backend-Code ist vorhanden, aber noch nicht auf einem öffentlichen Host bereitgestellt und noch nicht produktiv verbunden. Vor einem Live-Betrieb fehlen Hosting/HTTPS-Domain, produktive Sicherheitsprüfung und Datenschutz-/Löschangaben. Die Anleitung steht in [service/README.md](service/README.md); Architektur und Variantenregeln stehen in [docs/SERVICE-UND-FEEDBACKSTELLE.md](docs/SERVICE-UND-FEEDBACKSTELLE.md).
+**Wichtig:** Der Backend-Code ist vorhanden, aber noch nicht auf einem öffentlichen Host bereitgestellt und noch nicht produktiv verbunden. Vor einem Live-Betrieb fehlen Hosting/HTTPS-Domain, produktive Sicherheitsprüfung und Datenschutz-/Löschangaben. Die Anleitung steht in [service/README.md](service/README.md); Architektur und Variantenregeln stehen in [docs/SERVICE-UND-FEEDBACKSTELLE.md](docs/SERVICE-UND-FEEDBACKSTELLE.md). Die geplante geschlossene Testfreigabe mit Freischaltungsanfrage und einmaligem Code ist in [docs/TESTZUGANG-UND-FREISCHALTUNG.md](docs/TESTZUGANG-UND-FREISCHALTUNG.md) beschrieben; der vollständige Ablauf ist noch nicht live.
 
 ## Entwicklung
 
