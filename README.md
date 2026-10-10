@@ -12,7 +12,7 @@ Beide Varianten verwenden denselben Anwendungskern, dieselben Funktionen und die
 - **Basisinstallation:** reguläre Anwendung ohne integrierte öffentliche GitHub-Schnittstelle. Sie erhält dieselben Kern-, Design- und Funktionsupdates wie die Standardinstallation; Updates werden manuell über veröffentlichte Pakete bezogen und installiert.
 - **Standardinstallation:** dieselbe Anwendung mit zusätzlicher öffentlicher GitHub-Schnittstelle für Projektinformationen und die Prüfung verfügbarer Updates. Die Schnittstelle zeigt Veröffentlichungen an; automatische Installation ist noch nicht implementiert.
 
-Die Varianten dürfen **keine getrennten Designstände** entwickeln. Ein Design- oder Funktionsupdate wird zuerst gemeinsam entwickelt und getestet und danach für beide Varianten bereitgestellt.
+Die Varianten dürfen **keine getrennten Designstände** entwickeln. Ein Design- oder Funktionsupdate wird zuerst gemeinsam entwickelt und getestet und danach für beide Varianten bereitgestellt. Unabhängig davon kann jeder Nutzer in der Anwendung lokal zwischen dem aktuellen dunklen und einem klassischen hellen Oberflächendesign wählen; diese Auswahl ist keine dritte Installationsvariante.
 
 ## Prototyp 0.1
 
@@ -82,4 +82,4 @@ Früher Entwicklungsstand. Noch kein fertiges Installationspaket und keine verbi
 
 ### Wartung und spätere Kamerastreams
 
-Wartungsanzeigen dürfen die Video-/Kamerastream-Schnittstelle nicht blockieren. Eine spätere Kameraübertragung wird separat vom TV-Playlist-Wiedergabepfad umgesetzt; der zentrale Wartungsstatus darf keine aktive Medienwiedergabe pauschal stoppen. Die dedizierte Kamerafunktion ist noch nicht implementiert.
+Wartungsanzeigen dürfen die Video-/Kamerastream-Schnittstelle nicht blockieren. Eine spätere Kameraübertragung wird separat vom TV-Playlist-Wiedergabepfad umgesetzt; der zentrale Wartungsstatus darf keine aktive Medienwiedergabe pauschal stoppen. Die dedizierte Kamerafunktion ist noch nicht implementiert. Anforderungen an öffentliche Repositorys, private Daten und Kamerasicherheit stehen in [docs/PRIVATSPHAERE-UND-KAMERA.md](docs/PRIVATSPHAERE-UND-KAMERA.md).
