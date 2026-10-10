@@ -5,6 +5,7 @@ import os
 import secrets
 import sqlite3
 import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
@@ -55,8 +56,21 @@ def connect_db() -> sqlite3.Connection:
     return conn
 
 
+@contextmanager
+def db_session():
+    conn = connect_db()
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
 def init_db() -> None:
-    with connect_db() as db:
+    with db_session() as db:
         db.execute("""
             CREATE TABLE IF NOT EXISTS reports (
                 id TEXT PRIMARY KEY, report_type TEXT NOT NULL, subject TEXT NOT NULL,
@@ -109,12 +123,6 @@ def limit_reports(request: Request) -> None:
     _rate_buckets[host] = bucket
 
 
-def csrf_pair(response: Response) -> str:
-    token = secrets.token_urlsafe(24)
-    response.set_cookie("wt_csrf", token, httponly=True, secure=True, samesite="strict", max_age=1800)
-    return token
-
-
 def verify_csrf(request: Request, form_token: str) -> None:
     cookie_token = request.cookies.get("wt_csrf", "")
     if not cookie_token or not form_token or not hmac.compare_digest(cookie_token, form_token):
@@ -128,7 +136,7 @@ def health() -> dict:
 
 @app.get("/api/status")
 def public_status() -> dict:
-    with connect_db() as db:
+    with db_session() as db:
         row = db.execute("SELECT * FROM service_status WHERE singleton = 1").fetchone()
     import json
     return {
@@ -166,8 +174,8 @@ def submit_report(payload: ReportIn, request: Request) -> dict:
     return {"accepted": True, "reference": report_id, "created_at": created}
 
 
-def admin_page(title: str, body: str, response: Response) -> HTMLResponse:
-    token = csrf_pair(response)
+def admin_page(title: str, body: str) -> HTMLResponse:
+    token = secrets.token_urlsafe(24)
     html = f"""<!doctype html><html lang="de"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{escape(title)}</title><style>
@@ -177,7 +185,9 @@ article{{border:1px solid #3a4553;border-radius:8px;padding:1rem;margin:1rem 0;o
 small{{color:#bdc7d3}}.row{{display:flex;gap:.5rem;flex-wrap:wrap}}label{{display:block;margin-top:.5rem}}
 </style><h1>{escape(title)}</h1>{body}"""
     html = html.replace("__CSRF__", escape(token))
-    return HTMLResponse(html, headers={"Cache-Control": "no-store"})
+    response = HTMLResponse(html, headers={"Cache-Control": "no-store"})
+    response.set_cookie("wt_csrf", token, httponly=True, secure=True, samesite="strict", max_age=1800)
+    return response
 
 
 @app.get("/admin", response_class=HTMLResponse)
@@ -209,7 +219,7 @@ def admin_home(request: Request, _user: str = Depends(require_admin)) -> HTMLRes
 <label>Status <select name="status">{"".join(f'<option value="{s}" {"selected" if r["status"] == s else ""}>{s}</option>' for s in sorted(ALLOWED_STATUSES))}</select></label>
 <label>Interne Notiz <textarea name="internal_note" maxlength="4000" rows="2">{escape(r["internal_note"])}</textarea></label>
 <button>Meldung aktualisieren</button></form></article>"""
-    return admin_page("Windows TV – Betreiberbereich", body, Response())
+    return admin_page("Windows TV – Betreiberbereich", body)
 
 
 @app.post("/admin/reports/{report_id}")
