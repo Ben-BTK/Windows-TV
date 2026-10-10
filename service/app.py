@@ -278,7 +278,7 @@ PROVIDER_CATALOG = [
 PROVIDER_STATUSES = {"planned", "in_review", "integrated", "unavailable"}
 
 
-@app.get("/api/providers")
+@app.get("/api/providers", dependencies=[Depends(require_admin)])
 def list_providers(category: str | None = None, status: str | None = None) -> dict:
     """Machine-readable provider catalogue; this endpoint does not provide playback."""
     if category and category not in {p["category"] for p in PROVIDER_CATALOG}:
@@ -299,7 +299,7 @@ def list_providers(category: str | None = None, status: str | None = None) -> di
     }
 
 
-@app.get("/api/providers/{provider_id}")
+@app.get("/api/providers/{provider_id}", dependencies=[Depends(require_admin)])
 def get_provider(provider_id: str) -> dict:
     """Return one provider's current planning/integration metadata."""
     provider = next((p for p in PROVIDER_CATALOG if p["id"] == provider_id), None)
