@@ -21,15 +21,18 @@ Es gibt genau zwei vereinbarte Varianten. Sie sind keine unterschiedlichen Funkt
 
 ## Gemeinsame Release-Pipeline
 
-1. Änderung entwickeln.
-2. Gemeinsame Tests für Anwendung und Design durchführen.
-3. Eine gemeinsame Versionsnummer und Änderungsübersicht festlegen.
-4. Das gemeinsame Programm-/Designupdate für beide Varianten veröffentlichen.
-5. Für die Basisinstallation ein manuell installierbares Paket bereitstellen.
-6. Für die Standardinstallation zusätzlich Update-Metadaten über die öffentliche GitHub-Schnittstelle bereitstellen.
+1. Änderung entwickeln und gemeinsame Tests ausführen.
+2. Eine gemeinsame Versionsnummer und Änderungsübersicht festlegen.
+3. Das gemeinsame Programm-/Designupdate für beide Varianten veröffentlichen.
+4. Für die Basisinstallation ein manuell installierbares Paket bereitstellen.
+5. Für die Standardinstallation zusätzlich Update-Metadaten über die öffentliche GitHub-Schnittstelle bereitstellen.
 
 Die Varianten dürfen nicht auseinanderlaufen. Ein Update darf nicht ausschließlich für die Standardinstallation erscheinen, wenn es das gemeinsame Design oder den gemeinsamen Anwendungskern betrifft.
 
+## Installer
+
+Der Inno Setup-Installer enthält genau zwei Auswahlmöglichkeiten: **Basisinstallation** und **Standardinstallation**. Er installiert die Anwendung systemweit in den Programmordner und schreibt die gewählte Variante in eine lokale `variant.txt`. Die Standardvariante blendet die manuelle GitHub-Updateprüfung ein; die Basisvariante nicht.
+
 ## Aktueller Stand
 
-Die Laufzeit-Auswahl ist für den Quellcode über `WINDOWS_TV_VARIANT=basis` oder `WINDOWS_TV_VARIANT=standard` vorgesehen. Der fertige Windows-Installer mit Auswahl der beiden Varianten ist noch nicht erstellt.
+Die Installerdefinition und ein GitHub Actions Build sind vorbereitet. Ein fertiger Installer liegt erst vor, wenn der Windows-Build erfolgreich durchgelaufen ist und das Build-Artefakt veröffentlicht wurde. Die Updateprüfung zeigt nur öffentliche Release-Informationen an; sie installiert noch keine Updates automatisch.
