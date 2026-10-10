@@ -67,6 +67,10 @@ Die Standardinstallation liest derzeit `status/service-status.json` aus diesem �
 
 Das ist nur der aktuelle Prototyp. Zielarchitektur ist ein zentraler HTTPS-Service, den beide Varianten für Status und Meldungen verwenden; die Standardinstallation behält zusätzlich die GitHub-Schnittstelle. Details zur bisherigen Statusverwaltung stehen in [docs/STATUSBETRIEB.md](docs/STATUSBETRIEB.md).
 
+## Feedback und Störungsmeldungen
+
+Für das geplante zentrale Meldewesen sind drei Wege vorgesehen: technische Störung, Kritik/Feedback und Funktionswunsch. Zielablauf, Datenschutzregeln und offene technische Anforderungen sind in [Feedback und Störungsmeldungen](docs/FEEDBACK-UND-STOERUNGSMELDUNGEN.md) beschrieben. **Die zentrale Live-Meldemaske ist noch nicht implementiert**; dafür wird ein gesicherter HTTPS-Dienst mit Verwaltungsoberfläche benötigt. Die Funktion soll später in Basis- und Standardinstallation gleichermaßen verfügbar sein.
+
 ## Quellen und Nutzungsrechte
 
 Die technische Erreichbarkeit einer Playlist bedeutet nicht automatisch, dass alle darin verlinkten Inhalte zur Wiedergabe oder Weiterverbreitung freigegeben sind. Nutzer müssen erforderliche Rechte, Lizenzen und gültige Anbieterzugänge besitzen. Windows TV ist nicht dafür vorgesehen, Schutzmaßnahmen oder Bezahlschranken zu umgehen.
