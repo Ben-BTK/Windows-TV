@@ -9,16 +9,17 @@ Es gibt genau zwei vereinbarte Varianten. Sie sind keine unterschiedlichen Funkt
 - Enthält den normalen Windows-TV-Anwendungskern.
 - Enthält dieselben Oberflächen, Designs, Kernfunktionen und Fehlerbehebungen wie die Standardinstallation.
 - Enthält keine integrierte öffentliche GitHub-Schnittstelle.
-- Gemeinsame Updates werden über veröffentlichte Pakete bzw. manuell bereitgestellte Installationsdateien übernommen.
-- Jedes neue gemeinsame Design und jede gemeinsame Funktionsverbesserung muss auch für die Basisinstallation bereitgestellt werden.
+- Gemeinsame Programm- und Designupdates werden über veröffentlichte Pakete bzw. manuell bereitgestellte Installationsdateien übernommen.
+- Soll den zentralen Service-Endpunkt für Status, Kritik/Feedback und Störungsmeldungen verwenden können, sobald dieser bereitgestellt ist.
 
 ### 2. Standardinstallation
 
 - Enthält denselben Anwendungskern und dieselben Designs wie die Basisinstallation.
-- Enthält zusätzlich eine öffentliche GitHub-Schnittstelle für Update-Prüfung und Dienststatus.
+- Enthält zusätzlich eine öffentliche GitHub-Schnittstelle für Update-Prüfung und Projektinformationen.
 - Prüft beim Start und danach alle 24 Stunden auf veröffentlichte Updates; manuelle Prüfung bleibt verfügbar.
-- Fragt den öffentlichen Dienststatus beim Start und danach alle fünf Minuten ab.
+- Im aktuellen Prototyp fragt sie den öffentlichen GitHub-Dienststatus beim Start und danach alle fünf Minuten ab.
 - Die Update-Prüfung zeigt eine neue Veröffentlichung an, installiert sie aber nicht automatisch.
+- Soll denselben zentralen Service-Endpunkt für Status, Kritik/Feedback und Störungsmeldungen verwenden wie die Basisinstallation.
 
 ## Gemeinsame Releases
 
@@ -30,9 +31,9 @@ Es gibt genau zwei vereinbarte Varianten. Sie sind keine unterschiedlichen Funkt
 
 Die Varianten dürfen nicht auseinanderlaufen. Ein Update darf nicht ausschließlich für die Standardinstallation erscheinen, wenn es das gemeinsame Design oder den gemeinsamen Anwendungskern betrifft.
 
-## Dienststatus und Funktionssperren
+## Aktueller Dienststatus-Prototyp
 
-Die Standardinstallation liest `status/service-status.json`. Die Datei unterstützt diese Modi:
+Die Standardinstallation liest derzeit `status/service-status.json`. Die Datei unterstützt diese Modi:
 
 - `normal`
 - `limited_service`
@@ -43,22 +44,25 @@ Die Standardinstallation liest `status/service-status.json`. Die Datei unterstü
 
 Zulässige Einträge in `locked_features` sind `source_import`, `playback`, `favorites` und `all`. Wenn bei `maintenance` oder `acute_outage` keine Sperre angegeben ist, werden standardmäßig alle Kernfunktionen gesperrt. Bei `scheduled_maintenance` wird standardmäßig der Quellenimport gesperrt; bei `outage` die Wiedergabe. Explizite Sperren in der Statusdatei überschreiben diese Standardwerte. Stoppen bleibt immer möglich.
 
-Beispiel für eine Wartungsmeldung:
+Wenn die Statusdatei nicht erreichbar oder ungültig ist, wird keine neue Funktionssperre aktiviert. Dieser direkte GitHub-Abruf ist nur der aktuelle Prototyp und reicht nicht als langfristige gemeinsame Wartungsstelle aus.
 
-```json
-{
-  "mode": "maintenance",
-  "title": "Geplante Wartung",
-  "message": "Die Quellenverwaltung wird gewartet.",
-  "locked_features": ["source_import"],
-  "starts_at": "2026-10-10 22:00 UTC",
-  "ends_at": "2026-10-10 22:30 UTC",
-  "updated_at": "2026-10-10T21:50:00Z",
-  "announcement": ""
-}
-```
+## Ziel: zentrale Service- und Rückmeldestelle
 
-Wenn die Statusdatei nicht erreichbar oder ungültig ist, wird keine neue Funktionssperre aktiviert. Diese Statusabfrage ist Teil der Standardinstallation; die Basisinstallation enthält keine öffentliche GitHub-Schnittstelle, behält aber denselben gemeinsamen Design- und Funktionsstand.
+Beide Varianten sollen über denselben zentralen HTTPS-Service folgende Möglichkeiten erhalten:
+
+- aktuellen Wartungs- und Störungsstatus abrufen
+- Kritik, Feedback und Verbesserungsvorschläge übermitteln
+- spontane Störungen mit Kategorie, Schweregrad und Beschreibung melden
+- nach erfolgreicher Übermittlung eine Referenznummer erhalten
+- optionale Rückkontaktmöglichkeit, ohne persönliche Daten standardmäßig zu verlangen
+
+Dazu ist ein geschützter Betreiberbereich vorgesehen, in dem berechtigte Personen Meldungen sichten, priorisieren, beantworten und lösen sowie öffentliche Wartungsinformationen verwalten können.
+
+Die Basisinstallation erhält damit **keine** GitHub-Oberfläche. Sie verwendet lediglich die gemeinsame Service-Schnittstelle. Die Standardinstallation behält zusätzlich die GitHub-Schnittstelle für Updates und Projektinformationen.
+
+Eine statische Statusdatei oder GitHub Pages allein kann keine vertraulichen Meldungen sicher speichern und keine geschützte Betreiber-Inbox bereitstellen. Dafür werden ein Backend, Zugriffsschutz, Eingabevalidierung, Spam-Schutz, Datensparsamkeit und festgelegte Löschfristen benötigt. Diagnoseinformationen dürfen nur nach Anzeige des Inhalts und ausdrücklicher Bestätigung gesendet werden.
+
+Die vollständigen Anforderungen stehen in [SERVICE-UND-FEEDBACKSTELLE.md](SERVICE-UND-FEEDBACKSTELLE.md). **Die zentrale Backend-API, Meldungsübermittlung und Betreiberoberfläche sind noch nicht implementiert.**
 
 ## Installer und aktueller Stand
 
