@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+import json
+import os
 import sys
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from PySide6.QtCore import Qt, QUrl, QTimer, QSettings
 from PySide6.QtWidgets import (
-    QApplication, QComboBox, QFileDialog, QHBoxLayout, QLabel, QLineEdit,
-    QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPushButton,
-    QSplitter, QVBoxLayout, QWidget
+    QApplication, QCheckBox, QComboBox, QDialog, QFileDialog, QFormLayout,
+    QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMainWindow,
+    QMessageBox, QPushButton, QSplitter, QTextEdit, QVBoxLayout, QWidget
 )
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
@@ -16,7 +18,7 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from windows_tv.playlist import Channel, load_playlist_file, parse_m3u
 from windows_tv.storage import load_favorites, save_favorites
 from windows_tv.update_checker import check_latest_release
-from windows_tv.service_status import fetch_service_status
+from windows_tv.service_status import central_service_base_url, fetch_service_status
 from windows_tv.variant import is_standard_variant
 
 
@@ -90,9 +92,11 @@ class MainWindow(QMainWindow):
         self.play_button = QPushButton("Abspielen")
         self.stop_button = QPushButton("Stop")
         self.favorite_button = QPushButton("☆ Favorit")
+        self.feedback_button = QPushButton("Hilfe & Rückmeldung")
         self.play_button.clicked.connect(self.play_selected)
         self.stop_button.clicked.connect(self.player.stop)
         self.favorite_button.clicked.connect(self.toggle_favorite)
+        self.feedback_button.clicked.connect(self.open_feedback_dialog)
 
         left = QWidget()
         left_layout = QVBoxLayout(left)
@@ -110,6 +114,7 @@ class MainWindow(QMainWindow):
         controls.addWidget(self.stop_button)
         controls.addWidget(self.favorite_button)
         left_layout.addLayout(controls)
+        left_layout.addWidget(self.feedback_button)
 
         if self.standard_variant:
             self.update_button = QPushButton("Jetzt nach Updates suchen")
@@ -152,8 +157,7 @@ class MainWindow(QMainWindow):
             QListWidget::item:selected { background: #315b80; }
         """)
 
-        # Automatic checks are limited to the Standard installation because that
-        # is the variant with the public GitHub interface.
+        # GitHub update checks remain exclusive to the Standard installation.
         if self.standard_variant:
             QTimer.singleShot(2500, self.check_updates_automatically)
             self.update_timer = QTimer(self)
@@ -161,6 +165,9 @@ class MainWindow(QMainWindow):
             self.update_timer.timeout.connect(self.check_updates_automatically)
             self.update_timer.start()
 
+        # Both variants can use the central service once its HTTPS URL is configured.
+        # Until then, Standard retains the existing public status-file fallback.
+        if self.standard_variant or central_service_base_url():
             QTimer.singleShot(1200, self.check_service_status)
             self.service_timer = QTimer(self)
             self.service_timer.setInterval(STATUS_CHECK_INTERVAL_MS)
@@ -331,8 +338,126 @@ class MainWindow(QMainWindow):
             if not automatic:
                 QApplication.restoreOverrideCursor()
 
+
+    def open_feedback_dialog(self) -> None:
+        base_url = central_service_base_url()
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Hilfe & Rückmeldung")
+        dialog.resize(560, 520)
+        layout = QVBoxLayout(dialog)
+        if base_url:
+            info = QLabel(
+                "Du kannst eine Störung melden, Feedback geben oder einen Funktionswunsch senden. "
+                "Kontaktangaben sind freiwillig. Es werden keine Playlist-URLs oder Zugangsdaten übertragen."
+            )
+        else:
+            info = QLabel(
+                "Die zentrale Meldestelle ist noch nicht mit einem öffentlichen HTTPS-Server verbunden. "
+                "Es wird nichts übertragen. Die Maske ist vorbereitet und wird nach Einrichtung der Serveradresse aktiviert."
+            )
+        info.setWordWrap(True)
+        layout.addWidget(info)
+
+        form = QFormLayout()
+        category = QComboBox()
+        category.addItem("Störung melden", "incident")
+        category.addItem("Kritik / Feedback", "feedback")
+        category.addItem("Funktionswunsch", "feature_request")
+        subject = QLineEdit()
+        subject.setMaxLength(160)
+        subject.setPlaceholderText("Kurzer Titel")
+        description = QTextEdit()
+        description.setPlaceholderText("Was ist passiert oder was möchtest du vorschlagen?")
+        description.setMinimumHeight(130)
+        severity = QComboBox()
+        severity.addItem("Normal", "normal")
+        severity.addItem("Hoch – Funktion stark eingeschränkt", "high")
+        severity.addItem("Kritisch – Programm startet nicht / Hauptfunktion ausgefallen", "critical")
+        feature = QComboBox()
+        feature.addItem("Allgemein", "")
+        feature.addItem("Start / Programmfenster", "startup")
+        feature.addItem("Quellenimport", "source_import")
+        feature.addItem("Wiedergabe", "playback")
+        feature.addItem("Favoriten / Einstellungen", "favorites")
+        feature.addItem("Installation / Update", "installation")
+        contact = QLineEdit()
+        contact.setMaxLength(254)
+        contact.setPlaceholderText("Optional – z. B. E-Mail-Adresse")
+        form.addRow("Art der Meldung", category)
+        form.addRow("Betreff", subject)
+        form.addRow("Beschreibung", description)
+        form.addRow("Schweregrad", severity)
+        form.addRow("Betroffener Bereich", feature)
+        form.addRow("Rückkontakt (optional)", contact)
+        layout.addLayout(form)
+
+        privacy = QLabel(
+            "Bitte keine Passwörter, Stream-Zugangsdaten oder privaten Playlist-Inhalte eingeben. "
+            "Die Meldung ist kein Notruf und garantiert keine sofortige Reaktion."
+        )
+        privacy.setWordWrap(True)
+        layout.addWidget(privacy)
+        buttons = QHBoxLayout()
+        send_button = QPushButton("Meldung senden")
+        cancel_button = QPushButton("Schließen")
+        send_button.setEnabled(bool(base_url))
+        buttons.addWidget(send_button)
+        buttons.addWidget(cancel_button)
+        layout.addLayout(buttons)
+        cancel_button.clicked.connect(dialog.reject)
+
+        def send_report() -> None:
+            title = subject.text().strip()
+            details = description.toPlainText().strip()
+            if len(title) < 3 or len(details) < 10:
+                QMessageBox.warning(dialog, "Angaben fehlen", "Bitte Betreff (mindestens 3 Zeichen) und Beschreibung (mindestens 10 Zeichen) ausfüllen.")
+                return
+            payload = {
+                "report_type": category.currentData(),
+                "subject": title,
+                "description": details,
+                "severity": severity.currentData(),
+                "affected_feature": feature.currentData(),
+                "app_version": APP_VERSION,
+                "app_variant": "standard" if self.standard_variant else "basis",
+                "contact": contact.text().strip(),
+                "diagnostic_text": "",
+                "website": "",
+            }
+            request = Request(
+                base_url + "/api/reports",
+                data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                headers={"Content-Type": "application/json", "User-Agent": f"Windows-TV/{APP_VERSION}"},
+                method="POST",
+            )
+            send_button.setEnabled(False)
+            try:
+                with urlopen(request, timeout=8) as response:
+                    result = json.loads(response.read(64 * 1024 + 1).decode("utf-8"))
+                reference = result.get("reference", "")
+                if not result.get("accepted") or not reference:
+                    raise ValueError("Der Server hat keine gültige Eingangsbestätigung zurückgegeben.")
+                QMessageBox.information(
+                    dialog, "Meldung angenommen",
+                    f"Deine Meldung wurde gespeichert. Referenznummer: {reference}\n\n"
+                    "Bitte bewahre diese Nummer auf. Eine sofortige Antwort ist nicht garantiert."
+                )
+                dialog.accept()
+            except (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+                QMessageBox.warning(
+                    dialog, "Übermittlung fehlgeschlagen",
+                    "Die Meldung konnte nicht bestätigt werden. Sie wurde nicht als erfolgreich versendet markiert. "
+                    f"Bitte versuche es später erneut.\n\nDetails: {exc}"
+                )
+            finally:
+                if dialog.isVisible():
+                    send_button.setEnabled(True)
+
+        send_button.clicked.connect(send_report)
+        dialog.exec()
+
     def check_service_status(self) -> None:
-        if not self.standard_variant:
+        if not self.standard_variant and not central_service_base_url():
             return
         try:
             data = fetch_service_status()
