@@ -12,7 +12,7 @@ Beide Varianten verwenden denselben Anwendungskern, dieselben Funktionen und die
 - **Basisinstallation:** reguläre Anwendung ohne integrierte öffentliche GitHub-Schnittstelle. Sie erhält dieselben Kern-, Design- und Funktionsupdates wie die Standardinstallation; Updates werden manuell über veröffentlichte Pakete bezogen und installiert.
 - **Standardinstallation:** dieselbe Anwendung mit zusätzlicher öffentlicher GitHub-Schnittstelle für Projektinformationen und die Prüfung verfügbarer Updates. Die Schnittstelle zeigt Veröffentlichungen an; automatische Installation ist noch nicht implementiert.
 
-Die Varianten dürfen **keine getrennten Designstände** entwickeln. Ein Design- oder Funktionsupdate wird zuerst gemeinsam entwickelt und getestet und danach für beide Varianten bereitgestellt. Die Standardvariante darf zusätzliche Online-Komfortfunktionen besitzen; die Basisvariante darf dadurch nicht auf ältere Designs oder Kernfunktionen festgelegt werden.
+Die Varianten dürfen **keine getrennten Designstände** entwickeln. Ein Design- oder Funktionsupdate wird zuerst gemeinsam entwickelt und getestet und danach für beide Varianten bereitgestellt.
 
 ## Prototyp 0.1
 
@@ -24,12 +24,19 @@ Die Varianten dürfen **keine getrennten Designstände** entwickeln. Ein Design-
 - unterstützte Netzwerkstreams abspielen
 - verständliche Meldungen bei nicht unterstützten oder nicht erreichbaren Streams
 - in der Standardvariante: automatische Update-Prüfung beim Start und danach alle 24 Stunden sowie manuelle Prüfung
-- in der Standardvariante: Abruf einer öffentlichen Statusdatei beim Start und danach alle 5 Minuten
-- sichtbare Wartungs-/Störungsanzeige mit konfigurierbaren Sperren für Wiedergabe, Quellenimport, Favoriten oder alle Kernfunktionen
+- aktueller Prototyp: Statusabfrage über eine öffentliche Statusdatei ist vorhanden; die vollständige zentrale Wartungs- und Meldestelle ist noch nicht implementiert
 
 **Keine lokalen Videodateien:** MP4, MKV, AVI und vergleichbare Dateien sind keine Wiedergabequellen dieser Anwendung. Eine lokale M3U/M3U8-Datei ist nur eine Sender-/Quellenliste, keine Videodatei.
 
-Externe Streamingdienste, DRM-Umgehung, Bezahlzugangs-Umgehung, vollständiges EPG und Kinderbereich gehören nicht zum ersten Prototyp. Die Update-Prüfung informiert über veröffentlichte Releases, installiert Updates aber nicht automatisch. Die Basisinstallation hat keine integrierte öffentliche GitHub-Schnittstelle; sie erhält gemeinsame Design- und Kernupdates über manuell bereitgestellte Pakete.
+Externe Streamingdienste, DRM-Umgehung, Bezahlzugangs-Umgehung, vollständiges EPG und Kinderbereich gehören nicht zum ersten Prototyp. Die Update-Prüfung informiert über veröffentlichte Releases, installiert Updates aber nicht automatisch.
+
+## Zentrale Service- und Rückmeldestelle
+
+Geplant ist eine zentrale Stelle für **beide** Installationsvarianten. Sie soll Wartungs- und Störungsstatus veröffentlichen und eine Schnittstelle für Kritik, Feedback und spontane Störungsmeldungen bereitstellen. Dazu gehört auch ein geschützter Betreiberbereich zur Bearbeitung der Meldungen.
+
+Die Basisinstallation soll diese Service-Schnittstelle erreichen können, ohne eine integrierte öffentliche GitHub-Oberfläche zu erhalten. Die Standardinstallation darf zusätzlich die GitHub-Schnittstelle für Projektinformationen und Update-Prüfungen nutzen.
+
+**Wichtig:** Die vollständige Backend-API, die Feedback-/Störungsübermittlung und die geschützte Verwaltungsoberfläche sind noch nicht implementiert. Eine statische GitHub-Statusdatei allein kann diese Aufgaben nicht übernehmen. Die Anforderungen und die geplante Architektur stehen in [docs/SERVICE-UND-FEEDBACKSTELLE.md](docs/SERVICE-UND-FEEDBACKSTELLE.md).
 
 ## Entwicklung
 
@@ -37,7 +44,7 @@ Voraussetzung: Python 3.11 oder neuer.
 
 ```powershell
 py -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.\\.venv\\Scripts\\Activate.ps1
 python -m pip install -e .
 python -m windows_tv
 ```
@@ -54,13 +61,11 @@ $env:WINDOWS_TV_VARIANT = "standard"
 python -m windows_tv
 ```
 
-## Dienststatus und Funktionssperren
+## Aktueller Dienststatus-Prototyp
 
-Die Standardinstallation liest `status/service-status.json` aus diesem öffentlichen Repository. Sie fragt beim Start und danach alle fünf Minuten nach Änderungen. Die Anzeige kann geplante Wartung, laufende Wartung, eingeschränkten Dienst, Ausfall oder akute Störung melden. Über `locked_features` lassen sich Quellenimport, Wiedergabe, Favoriten oder alle Kernfunktionen vorübergehend sperren. Die Schaltfläche zum Stoppen der Wiedergabe bleibt verfügbar.
+Die Standardinstallation liest derzeit `status/service-status.json` aus diesem öffentlichen Repository und fragt beim Start und danach alle fünf Minuten nach Änderungen. Unterstützte Modi sind `normal`, `limited_service`, `scheduled_maintenance`, `maintenance`, `outage` und `acute_outage`. Zulässige Sperren sind `source_import`, `playback`, `favorites` und `all`. Wenn die Statusdatei nicht erreichbar oder ungültig ist, wird keine neue Funktionssperre aktiviert.
 
-Beispiele für `mode`: `normal`, `limited_service`, `scheduled_maintenance`, `maintenance`, `outage`, `acute_outage`. Zulässige Sperren: `source_import`, `playback`, `favorites`, `all`. Bei einem Wartungsmodus ohne ausdrücklich angegebene Sperren werden sichere Standardwerte angewendet. Wenn die Statusdatei nicht erreichbar ist, wird keine neue Sperre aktiviert.
-
-Die Basisinstallation fragt keine öffentliche GitHub-Schnittstelle ab. Sie verwendet aber denselben gemeinsamen Programm- und Designstand; gemeinsame Updates werden für beide Varianten bereitgestellt.
+Das ist nur der aktuelle Prototyp. Zielarchitektur ist ein zentraler HTTPS-Service, den beide Varianten für Status und Meldungen verwenden; die Standardinstallation behält zusätzlich die GitHub-Schnittstelle. Details zur bisherigen Statusverwaltung stehen in [docs/STATUSBETRIEB.md](docs/STATUSBETRIEB.md).
 
 ## Quellen und Nutzungsrechte
 
