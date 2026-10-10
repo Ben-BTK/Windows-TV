@@ -32,11 +32,11 @@ Externe Streamingdienste, DRM-Umgehung, Bezahlzugangs-Umgehung, vollständiges E
 
 ## Zentrale Service- und Rückmeldestelle
 
-Geplant ist eine zentrale Stelle für **beide** Installationsvarianten. Sie soll Wartungs- und Störungsstatus veröffentlichen und eine Schnittstelle für Kritik, Feedback und spontane Störungsmeldungen bereitstellen. Dazu gehört auch ein geschützter Betreiberbereich zur Bearbeitung der Meldungen.
+Die zentrale Service-Komponente für **beide** Installationsvarianten ist jetzt als Backend-Grundlage im Ordner `service/` angelegt: HTTPS-API für Dienststatus und Meldungen, SQLite-Speicherung, Referenznummern und ein geschützter Betreiberbereich. Die Anwendung enthält außerdem eine gemeinsame Hilfe-/Rückmeldemaske. Sie bleibt bis zur Konfiguration einer echten öffentlichen HTTPS-Serveradresse bewusst deaktiviert, damit keine Meldung fälschlich als versendet gilt.
 
 Die Basisinstallation soll diese Service-Schnittstelle erreichen können, ohne eine integrierte öffentliche GitHub-Oberfläche zu erhalten. Die Standardinstallation darf zusätzlich die GitHub-Schnittstelle für Projektinformationen und Update-Prüfungen nutzen.
 
-**Wichtig:** Die vollständige Backend-API, die Feedback-/Störungsübermittlung und die geschützte Verwaltungsoberfläche sind noch nicht implementiert. Eine statische GitHub-Statusdatei allein kann diese Aufgaben nicht übernehmen. Die Anforderungen und die geplante Architektur stehen in [docs/SERVICE-UND-FEEDBACKSTELLE.md](docs/SERVICE-UND-FEEDBACKSTELLE.md).
+**Wichtig:** Der Backend-Code ist vorhanden, aber noch nicht auf einem öffentlichen Host bereitgestellt und noch nicht produktiv verbunden. Vor einem Live-Betrieb fehlen Hosting/HTTPS-Domain, produktive Sicherheitsprüfung und Datenschutz-/Löschangaben. Die Anleitung steht in [service/README.md](service/README.md); Architektur und Variantenregeln stehen in [docs/SERVICE-UND-FEEDBACKSTELLE.md](docs/SERVICE-UND-FEEDBACKSTELLE.md).
 
 ## Entwicklung
 
@@ -69,7 +69,7 @@ Das ist nur der aktuelle Prototyp. Zielarchitektur ist ein zentraler HTTPS-Servi
 
 ## Feedback und Störungsmeldungen
 
-Für das geplante zentrale Meldewesen sind drei Wege vorgesehen: technische Störung, Kritik/Feedback und Funktionswunsch. Zielablauf, Datenschutzregeln und offene technische Anforderungen sind in [Feedback und Störungsmeldungen](docs/FEEDBACK-UND-STOERUNGSMELDUNGEN.md) beschrieben. **Die zentrale Live-Meldemaske ist noch nicht implementiert**; dafür wird ein gesicherter HTTPS-Dienst mit Verwaltungsoberfläche benötigt. Die Funktion soll später in Basis- und Standardinstallation gleichermaßen verfügbar sein.
+Die gemeinsame Maske für technische Störung, Kritik/Feedback und Funktionswunsch ist in der App angelegt. Sobald `WINDOWS_TV_SERVICE_URL` auf die bereitgestellte HTTPS-Serveradresse zeigt, können beide Installationsvarianten Status und Meldeservice nutzen. Ohne diese Konfiguration bleibt das Senden deaktiviert. Ablauf und Datenschutzregeln stehen in [Feedback und Störungsmeldungen](docs/FEEDBACK-UND-STOERUNGSMELDUNGEN.md).
 
 ## Quellen und Nutzungsrechte
 
