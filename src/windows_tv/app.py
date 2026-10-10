@@ -4,7 +4,7 @@ import sys
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import Qt, QUrl, QTimer, QSettings
 from PySide6.QtWidgets import (
     QApplication, QComboBox, QFileDialog, QHBoxLayout, QLabel, QLineEdit,
     QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPushButton,
@@ -16,10 +16,14 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from windows_tv.playlist import Channel, load_playlist_file, parse_m3u
 from windows_tv.storage import load_favorites, save_favorites
 from windows_tv.update_checker import check_latest_release
+from windows_tv.service_status import fetch_service_status
 from windows_tv.variant import is_standard_variant
 
 
 APP_TITLE = "Windows TV"
+APP_VERSION = "0.1.0.dev0"
+UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000
+STATUS_CHECK_INTERVAL_MS = 5 * 60 * 1000
 
 
 def fetch_playlist(url: str) -> str:
@@ -44,6 +48,11 @@ class MainWindow(QMainWindow):
         self.channels: list[Channel] = []
         self.favorites = load_favorites()
         self.current_channel: Channel | None = None
+        self.standard_variant = is_standard_variant()
+        self.settings = QSettings("Ben-BTK", APP_TITLE)
+        self.service_mode = "unknown"
+        self.locked_features: set[str] = set()
+        self.last_notified_release = self.settings.value("last_notified_release", "", type=str)
 
         self.player = QMediaPlayer(self)
         self.audio = QAudioOutput(self)
@@ -63,6 +72,14 @@ class MainWindow(QMainWindow):
         self.channel_list = QListWidget()
         self.status = QLabel("Bereit. Bitte eine M3U/M3U8-Quelle hinzufügen.")
         self.status.setWordWrap(True)
+        self.service_banner = QLabel()
+        self.service_banner.setWordWrap(True)
+        self.service_banner.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.service_banner.setStyleSheet(
+            "QLabel { background: #493b20; color: #fff1c2; border: 1px solid #8b6b2d; "
+            "border-radius: 7px; padding: 10px; font-weight: 600; }"
+        )
+        self.service_banner.hide()
 
         self.import_url_button.clicked.connect(self.import_url)
         self.import_file_button.clicked.connect(self.import_file)
@@ -94,8 +111,8 @@ class MainWindow(QMainWindow):
         controls.addWidget(self.favorite_button)
         left_layout.addLayout(controls)
 
-        if is_standard_variant():
-            self.update_button = QPushButton("Nach Updates suchen")
+        if self.standard_variant:
+            self.update_button = QPushButton("Jetzt nach Updates suchen")
             self.update_button.clicked.connect(self.check_updates)
             left_layout.addWidget(self.update_button)
 
@@ -112,7 +129,12 @@ class MainWindow(QMainWindow):
         splitter.addWidget(left)
         splitter.addWidget(right)
         splitter.setSizes([380, 800])
-        self.setCentralWidget(splitter)
+        central = QWidget()
+        central_layout = QVBoxLayout(central)
+        central_layout.setContentsMargins(8, 8, 8, 8)
+        central_layout.addWidget(self.service_banner)
+        central_layout.addWidget(splitter, 1)
+        self.setCentralWidget(central)
 
         self.setStyleSheet("""
             QMainWindow { background: #15191f; color: #eef2f6; }
@@ -130,7 +152,25 @@ class MainWindow(QMainWindow):
             QListWidget::item:selected { background: #315b80; }
         """)
 
+        # Automatic checks are limited to the Standard installation because that
+        # is the variant with the public GitHub interface.
+        if self.standard_variant:
+            QTimer.singleShot(2500, self.check_updates_automatically)
+            self.update_timer = QTimer(self)
+            self.update_timer.setInterval(UPDATE_CHECK_INTERVAL_MS)
+            self.update_timer.timeout.connect(self.check_updates_automatically)
+            self.update_timer.start()
+
+            QTimer.singleShot(1200, self.check_service_status)
+            self.service_timer = QTimer(self)
+            self.service_timer.setInterval(STATUS_CHECK_INTERVAL_MS)
+            self.service_timer.timeout.connect(self.check_service_status)
+            self.service_timer.start()
+
     def import_url(self) -> None:
+        if self._is_locked("source_import"):
+            self._show_locked_message("Quellenimport")
+            return
         url = self.url_input.text().strip()
         if not url.lower().startswith(("https://", "http://")):
             QMessageBox.warning(self, "Quelle prüfen", "Bitte eine HTTP- oder HTTPS-Playlist-URL eingeben.")
@@ -150,6 +190,9 @@ class MainWindow(QMainWindow):
             QApplication.restoreOverrideCursor()
 
     def import_file(self) -> None:
+        if self._is_locked("source_import"):
+            self._show_locked_message("Quellenimport")
+            return
         path, _ = QFileDialog.getOpenFileName(
             self, "M3U/M3U8-Playlist öffnen", "", "Playlist-Dateien (*.m3u *.m3u8)"
         )
@@ -197,6 +240,9 @@ class MainWindow(QMainWindow):
         return next((channel for channel in self.channels if channel.url == url), None)
 
     def play_selected(self, *_args) -> None:
+        if self._is_locked("playback"):
+            self._show_locked_message("Wiedergabe")
+            return
         channel = self._selected_channel()
         if channel is None:
             QMessageBox.information(self, "Sender auswählen", "Bitte zuerst einen Sender aus der Liste auswählen.")
@@ -208,6 +254,9 @@ class MainWindow(QMainWindow):
         self.player.play()
 
     def toggle_favorite(self) -> None:
+        if self._is_locked("favorites"):
+            self._show_locked_message("Favoriten")
+            return
         channel = self._selected_channel()
         if channel is None:
             QMessageBox.information(self, "Favorit", "Bitte zuerst einen Sender auswählen.")
@@ -222,29 +271,149 @@ class MainWindow(QMainWindow):
         self.refresh_channels()
 
     def check_updates(self) -> None:
-        self.status.setText("Prüfe öffentliche GitHub-Veröffentlichungen …")
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        self._check_updates(automatic=False)
+
+    def check_updates_automatically(self) -> None:
+        self._check_updates(automatic=True)
+
+    def _check_updates(self, automatic: bool) -> None:
+        if not self.standard_variant:
+            return
+        if not automatic:
+            self.status.setText("Prüfe öffentliche GitHub-Veröffentlichungen …")
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         try:
             release = check_latest_release()
             if release is None:
-                QMessageBox.information(
-                    self, "Updates", "Es wurde noch keine öffentliche GitHub-Veröffentlichung gefunden."
-                )
-                self.status.setText("Keine veröffentlichte Version gefunden; die Update-Prüfung war erfolgreich.")
+                if not automatic:
+                    QMessageBox.information(
+                        self, "Updates",
+                        "Es wurde noch keine öffentliche GitHub-Veröffentlichung gefunden."
+                    )
+                    self.status.setText("Keine veröffentlichte Version gefunden.")
                 return
-            QMessageBox.information(
-                self, "Veröffentlichte Version",
-                f"Neueste Veröffentlichung: {release['tag_name']}\n\n"
+
+            tag = release["tag_name"].strip()
+            normalized_tag = tag.removeprefix("v").removeprefix("V")
+            normalized_current = APP_VERSION.removeprefix("v").removeprefix("V")
+            if normalized_tag == normalized_current:
+                if not automatic:
+                    QMessageBox.information(
+                        self, "Updates",
+                        f"Du verwendest die aktuell veröffentlichte Version ({tag})."
+                    )
+                    self.status.setText(f"Version aktuell: {tag}")
+                return
+
+            self.status.setText(f"Eine GitHub-Veröffentlichung ist verfügbar: {tag}")
+            if automatic and tag == self.last_notified_release:
+                return
+            self.last_notified_release = tag
+            self.settings.setValue("last_notified_release", tag)
+            box = QMessageBox(self)
+            box.setWindowTitle("Update verfügbar")
+            box.setIcon(QMessageBox.Icon.Information)
+            box.setText(f"Eine veröffentlichte Windows-TV-Version wurde gefunden: {tag}")
+            box.setInformativeText(
+                f"{release.get('name', '')}\n\n"
                 f"{release.get('html_url', '')}\n\n"
-                "Die automatische Installation von Updates ist noch nicht implementiert."
+                "Die Aktualisierung wird nicht automatisch installiert. "
+                "Bitte öffne die Veröffentlichung und prüfe die Hinweise."
             )
-            self.status.setText(f"GitHub-Veröffentlichung gefunden: {release['tag_name']}")
+            box.setStandardButtons(QMessageBox.StandardButton.Ok)
+            box.exec()
         except (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError) as exc:
-            QMessageBox.warning(self, "Update-Prüfung fehlgeschlagen", str(exc))
+            # Scheduled checks should not interrupt the user with repeated pop-ups.
+            if not automatic:
+                QMessageBox.warning(self, "Update-Prüfung fehlgeschlagen", str(exc))
             self.status.setText("GitHub-Update-Informationen sind derzeit nicht erreichbar.")
         finally:
-            QApplication.restoreOverrideCursor()
+            if not automatic:
+                QApplication.restoreOverrideCursor()
 
+    def check_service_status(self) -> None:
+        if not self.standard_variant:
+            return
+        try:
+            data = fetch_service_status()
+            self._apply_service_status(data)
+        except (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError):
+            # A temporary status endpoint failure must not falsely lock the app.
+            if self.service_mode == "unknown":
+                self.status.setText(
+                    "Der öffentliche Dienststatus ist derzeit nicht erreichbar; "
+                    "es wurde keine automatische Funktionssperre aktiviert."
+                )
+
+    def _apply_service_status(self, data: dict) -> None:
+        mode = data["mode"]
+        locks = set(data["locked_features"])
+        if not locks:
+            if mode in {"maintenance", "acute_outage"}:
+                locks = {"all"}
+            elif mode == "scheduled_maintenance":
+                locks = {"source_import"}
+            elif mode == "outage":
+                locks = {"playback"}
+
+        self.service_mode = mode
+        self.locked_features = locks
+        title = data.get("title", "").strip()
+        message = data.get("message", "").strip()
+        announcement = data.get("announcement", "").strip()
+        lines = []
+        if title:
+            lines.append(title)
+        elif mode != "normal":
+            lines.append({
+                "limited_service": "Eingeschränkter Dienst",
+                "scheduled_maintenance": "Geplante Wartungsarbeiten",
+                "maintenance": "Wartungsarbeiten",
+                "outage": "Dienststörung",
+                "acute_outage": "Akute Störung",
+            }.get(mode, "Dienststatus"))
+        if message:
+            lines.append(message)
+        if announcement:
+            lines.append(announcement)
+        if data.get("starts_at"):
+            lines.append("Beginn: " + data["starts_at"])
+        if data.get("ends_at"):
+            lines.append("Voraussichtliches Ende: " + data["ends_at"])
+
+        if mode == "normal" and not lines:
+            self.service_banner.hide()
+        else:
+            self.service_banner.setText("\n".join(lines) or "Dienstinformationen verfügbar.")
+            self.service_banner.show()
+
+        self._sync_locked_controls()
+        if mode != "normal":
+            self.status.setText("Dienststatus: " + mode.replace("_", " "))
+        elif announcement:
+            self.status.setText(announcement)
+
+        if "playback" in locks or "all" in locks:
+            self.player.stop()
+            self.current_channel = None
+            self.now_playing.setText("Wiedergabe derzeit gesperrt")
+
+    def _is_locked(self, feature: str) -> bool:
+        return "all" in self.locked_features or feature in self.locked_features
+
+    def _show_locked_message(self, feature_name: str) -> None:
+        QMessageBox.information(
+            self, "Funktion vorübergehend gesperrt",
+            f"{feature_name} ist aufgrund von Wartungsarbeiten oder einer Dienststörung "
+            "vorübergehend gesperrt. Bitte beachte die Statusanzeige im oberen Bereich."
+        )
+
+    def _sync_locked_controls(self) -> None:
+        self.import_url_button.setEnabled(not self._is_locked("source_import"))
+        self.import_file_button.setEnabled(not self._is_locked("source_import"))
+        self.play_button.setEnabled(not self._is_locked("playback"))
+        self.favorite_button.setEnabled(not self._is_locked("favorites"))
+        self.channel_list.setEnabled(not self._is_locked("all"))
     def _player_error(self, *_args) -> None:
         message = self.player.errorString() or "Der Stream kann mit dem aktuell verfügbaren Wiedergabemodul nicht abgespielt werden."
         self.status.setText("Stream nicht verfügbar oder nicht unterstützt.")
