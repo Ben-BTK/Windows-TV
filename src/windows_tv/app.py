@@ -517,10 +517,10 @@ class MainWindow(QMainWindow):
         elif announcement:
             self.status.setText(announcement)
 
-        if "playback" in locks or "all" in locks:
-            self.player.stop()
-            self.current_channel = None
-            self.now_playing.setText("Wiedergabe derzeit gesperrt")
+        # A maintenance status must never forcibly stop an active media session.
+        # It only disables starting TV playlist playback through the controls above.
+        # Future embedded camera streams must use their own player/session and must
+        # not consult the TV maintenance lock set.
 
     def _is_locked(self, feature: str) -> bool:
         return "all" in self.locked_features or feature in self.locked_features
