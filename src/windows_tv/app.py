@@ -92,6 +92,13 @@ class MainWindow(QMainWindow):
         self.stop_button = QPushButton("Stop")
         self.favorite_button = QPushButton("☆ Favorit")
         self.feedback_button = QPushButton("Hilfe & Rückmeldung")
+        self.design_selector = QComboBox()
+        self.design_selector.addItem("Aktuelles Design (dunkel)", "current")
+        self.design_selector.addItem("Klassisches Design (hell)", "classic")
+        saved_design = self.settings.value("design", "current", type=str)
+        design_index = self.design_selector.findData(saved_design)
+        self.design_selector.setCurrentIndex(design_index if design_index >= 0 else 0)
+        self.design_selector.currentIndexChanged.connect(self.apply_design)
         self.play_button.clicked.connect(self.play_selected)
         self.stop_button.clicked.connect(self.player.stop)
         self.favorite_button.clicked.connect(self.toggle_favorite)
@@ -113,6 +120,8 @@ class MainWindow(QMainWindow):
         controls.addWidget(self.stop_button)
         controls.addWidget(self.favorite_button)
         left_layout.addLayout(controls)
+        left_layout.addWidget(QLabel("Oberflächendesign"))
+        left_layout.addWidget(self.design_selector)
         left_layout.addWidget(self.feedback_button)
 
         if self.standard_variant:
@@ -140,21 +149,8 @@ class MainWindow(QMainWindow):
         central_layout.addWidget(splitter, 1)
         self.setCentralWidget(central)
 
-        self.setStyleSheet("""
-            QMainWindow { background: #15191f; color: #eef2f6; }
-            QWidget { color: #eef2f6; font-size: 10pt; }
-            QLineEdit, QListWidget, QComboBox {
-                background: #202731; border: 1px solid #3a4553;
-                border-radius: 6px; padding: 7px;
-            }
-            QPushButton {
-                background: #2b3746; border: 1px solid #455466;
-                border-radius: 6px; padding: 8px 11px;
-            }
-            QPushButton:hover { background: #394a5e; }
-            QListWidget::item { padding: 7px; }
-            QListWidget::item:selected { background: #315b80; }
-        """)
+        self.apply_design()
+
 
         # GitHub update checks remain exclusive to the Standard installation.
         if self.standard_variant:
@@ -172,6 +168,53 @@ class MainWindow(QMainWindow):
             self.service_timer.setInterval(STATUS_CHECK_INTERVAL_MS)
             self.service_timer.timeout.connect(self.check_service_status)
             self.service_timer.start()
+
+
+    def apply_design(self, *_args) -> None:
+        design = self.design_selector.currentData() if hasattr(self, "design_selector") else "current"
+        self.settings.setValue("design", design)
+        if design == "classic":
+            self.setStyleSheet("""
+                QMainWindow { background: #f2f2f2; color: #202020; }
+                QWidget { color: #202020; font-size: 10pt; }
+                QLineEdit, QListWidget, QComboBox, QTextEdit {
+                    background: #ffffff; color: #202020; border: 1px solid #a0a0a0;
+                    border-radius: 3px; padding: 7px;
+                }
+                QPushButton {
+                    background: #e7e7e7; color: #202020; border: 1px solid #888888;
+                    border-radius: 3px; padding: 8px 11px;
+                }
+                QPushButton:hover { background: #d5e6f7; }
+                QPushButton:disabled { color: #888888; background: #eeeeee; }
+                QListWidget::item { padding: 7px; }
+                QListWidget::item:selected { background: #c8def4; color: #111111; }
+            """)
+            self.service_banner.setStyleSheet(
+                "QLabel { background: #fff2cc; color: #4d3b00; border: 1px solid #c9a64b; "
+                "border-radius: 5px; padding: 10px; font-weight: 600; }"
+            )
+        else:
+            self.setStyleSheet("""
+                QMainWindow { background: #15191f; color: #eef2f6; }
+                QWidget { color: #eef2f6; font-size: 10pt; }
+                QLineEdit, QListWidget, QComboBox, QTextEdit {
+                    background: #202731; color: #eef2f6; border: 1px solid #3a4553;
+                    border-radius: 6px; padding: 7px;
+                }
+                QPushButton {
+                    background: #2b3746; color: #eef2f6; border: 1px solid #455466;
+                    border-radius: 6px; padding: 8px 11px;
+                }
+                QPushButton:hover { background: #394a5e; }
+                QPushButton:disabled { color: #8b949e; background: #202731; }
+                QListWidget::item { padding: 7px; }
+                QListWidget::item:selected { background: #315b80; }
+            """)
+            self.service_banner.setStyleSheet(
+                "QLabel { background: #493b20; color: #fff1c2; border: 1px solid #8b6b2d; "
+                "border-radius: 7px; padding: 10px; font-weight: 600; }"
+            )
 
     def import_url(self) -> None:
         if self._is_locked("source_import"):
