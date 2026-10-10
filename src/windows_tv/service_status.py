@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from urllib.request import Request, urlopen
 
 
@@ -20,9 +21,15 @@ ALLOWED_MODES = {
 ALLOWED_LOCKS = {"all", "playback", "source_import", "favorites"}
 
 
+def central_service_base_url() -> str:
+    return os.environ.get("WINDOWS_TV_SERVICE_URL", "").strip().rstrip("/")
+
+
 def fetch_service_status(timeout: float = 4.0) -> dict:
+    base_url = central_service_base_url()
+    status_url = base_url + "/api/status" if base_url else STATUS_URL
     request = Request(
-        STATUS_URL,
+        status_url,
         headers={"User-Agent": "Windows-TV-service-status/0.1", "Cache-Control": "no-cache"},
     )
     with urlopen(request, timeout=timeout) as response:
