@@ -81,3 +81,15 @@ Nur berechtigte Betreiber dürfen den Status ändern oder Meldungen verwalten. D
 - CI wurde um API-Tests ergänzt.
 
 **Noch offen:** Backend auf einem öffentlichen Host bereitstellen, HTTPS und Reverse-Proxy-Rate-Limits einrichten, Datenschutz-/Löschregeln festlegen, Sicherheit prüfen und anschließend die reale Service-URL für die App konfigurieren. Bis dahin ist es noch keine produktiv erreichbare Live-Meldestelle. Die Bereitstellungsanleitung liegt in [`service/README.md`](../service/README.md).
+
+
+## Verbindliche Grenze: Wartung darf Kamerastreams nicht stoppen
+
+Der zentrale Wartungsstatus ist nur für die Windows-TV-Funktionen rund um TV-Playlist-Import, Senderliste, Favoriten und das Starten einer TV-Playlist-Wiedergabe gedacht. Eine Statusänderung darf **keinen bereits laufenden Mediaplayer pauschal stoppen**.
+
+Für eine spätere eingebettete Kamera-/Überwachungskameraübertragung gilt verbindlich:
+- Kamerastreams werden als eigener Funktionsbereich mit eigener Wiedergabesitzung bzw. eigenem Player umgesetzt.
+- Die Kamera-Schnittstelle darf nicht von den TV-Wartungssperren `playback` oder `all` abhängig sein.
+- Eine Wartungsmeldung, ein Ausfall der zentralen Status-API oder ein Feedback-Bericht darf die Kameraübertragung weder deaktivieren noch unterbrechen.
+- Die zentrale Service-Schnittstelle darf Hinweise anzeigen, aber keine Steuerbefehle an Kameras senden und keine Kamera-Verbindungen verwalten.
+- Diese Trennung ist eine Architekturvorgabe für die spätere Kamera-Funktion; die dedizierte Kamera-Schnittstelle selbst ist noch nicht implementiert.
