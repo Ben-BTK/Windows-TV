@@ -1,0 +1,16 @@
+services:
+  windows-tv-service:
+    build: .
+    restart: unless-stopped
+    environment:
+      WINDOWS_TV_SERVICE_DB: /data/windows_tv_service.sqlite3
+      WINDOWS_TV_ADMIN_USER: ${WINDOWS_TV_ADMIN_USER:?set in .env}
+      WINDOWS_TV_ADMIN_PASSWORD: ${WINDOWS_TV_ADMIN_PASSWORD:?set in .env}
+    volumes:
+      - windows_tv_service_data:/data
+    expose:
+      - "8000"
+    # Put this service behind a reverse proxy with HTTPS and request-size/rate limits.
+    # Do not publish port 8000 directly to the internet.
+volumes:
+  windows_tv_service_data:
