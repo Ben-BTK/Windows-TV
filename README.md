@@ -9,20 +9,21 @@ Windows TV ist ein lokaler Windows-Client zum Verwalten und Wiedergeben unterst�
 
 Beide Varianten verwenden denselben Anwendungskern, dieselben Funktionen und dieselben Design- und Funktionsupdates.
 
-- **Basisinstallation:** reguläre Anwendung ohne integrierte öffentliche GitHub-Schnittstelle. Updates können manuell über bereitgestellte Projektveröffentlichungen bezogen und installiert werden.
-- **Standardinstallation:** dieselbe Anwendung mit zusätzlicher öffentlicher GitHub-Schnittstelle für Projektinformationen und Update-Prüfung, sofern diese Funktion aktiviert und verfügbar ist.
+- **Basisinstallation:** reguläre Anwendung ohne integrierte öffentliche GitHub-Schnittstelle. Sie erhält dieselben Kern-, Design- und Funktionsupdates wie die Standardinstallation; Updates werden manuell über veröffentlichte Pakete bezogen und installiert.
+- **Standardinstallation:** dieselbe Anwendung mit zusätzlicher öffentlicher GitHub-Schnittstelle für Projektinformationen und die Prüfung verfügbarer Updates. Die Schnittstelle zeigt Veröffentlichungen an; automatische Installation ist noch nicht implementiert.
 
 Die Varianten dürfen **keine getrennten Designstände** entwickeln. Ein Design- oder Funktionsupdate wird zuerst gemeinsam entwickelt und getestet und danach für beide Varianten bereitgestellt. Die Standardvariante darf zusätzliche Online-Komfortfunktionen besitzen; die Basisvariante darf dadurch nicht auf ältere Designs oder Kernfunktionen festgelegt werden.
 
-## Geplanter Prototyp 0.1
+## Prototyp 0.1
 
 - Windows-GUI
 - M3U- und M3U8-Playlists von einer URL oder aus einer lokalen Playlist-Datei importieren
 - Playlist technisch abrufen und Einträge parsen
-- Sender suchen und filtern
+- Sender suchen und nach Gruppe filtern
 - Favoriten lokal speichern
 - unterstützte Netzwerkstreams abspielen
 - verständliche Meldungen bei nicht unterstützten oder nicht erreichbaren Streams
+- in der Standardvariante: manuelle Prüfung öffentlicher GitHub-Releases
 
 **Keine lokalen Videodateien:** MP4, MKV, AVI und vergleichbare Dateien sind keine Wiedergabequellen dieser Anwendung. Eine lokale M3U/M3U8-Datei ist nur eine Sender-/Quellenliste, keine Videodatei.
 
@@ -35,11 +36,21 @@ Voraussetzung: Python 3.11 oder neuer.
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -e .
 python -m windows_tv
 ```
 
-Falls PowerShell die Aktivierung blockiert, kann stattdessen direkt die Python-Datei aus der virtuellen Umgebung aufgerufen werden.
+Für die Basisvariante:
+```powershell
+$env:WINDOWS_TV_VARIANT = "basis"
+python -m windows_tv
+```
+
+Für die Standardvariante:
+```powershell
+$env:WINDOWS_TV_VARIANT = "standard"
+python -m windows_tv
+```
 
 ## Quellen und Nutzungsrechte
 
