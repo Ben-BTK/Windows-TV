@@ -15,6 +15,8 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 
 from windows_tv.playlist import Channel, load_playlist_file, parse_m3u
 from windows_tv.storage import load_favorites, save_favorites
+from windows_tv.update_checker import check_latest_release
+from windows_tv.variant import is_standard_variant
 
 
 APP_TITLE = "Windows TV"
@@ -23,15 +25,10 @@ APP_TITLE = "Windows TV"
 def fetch_playlist(url: str) -> str:
     request = Request(url, headers={"User-Agent": "Windows-TV/0.1 (playlist importer)"})
     with urlopen(request, timeout=12) as response:
-        content_type = response.headers.get_content_type()
-        if response.status < 200 or response.status >= 300:
-            raise ValueError(f"Der Server antwortete mit HTTP {response.status}.")
-        if len(response.read(1)) == 0:
-            raise ValueError("Die Playlist ist leer.")
-        response.close()
-    # Read the playlist separately with a bounded response to avoid unbounded downloads.
-    with urlopen(request, timeout=12) as response:
+        status = response.status
         raw = response.read(8 * 1024 * 1024 + 1)
+    if status < 200 or status >= 300:
+        raise ValueError(f"Der Server antwortete mit HTTP {status}.")
     if len(raw) > 8 * 1024 * 1024:
         raise ValueError("Die Playlist ist größer als 8 MiB und wird nicht importiert.")
     if not raw.strip():
@@ -96,6 +93,12 @@ class MainWindow(QMainWindow):
         controls.addWidget(self.stop_button)
         controls.addWidget(self.favorite_button)
         left_layout.addLayout(controls)
+
+        if is_standard_variant():
+            self.update_button = QPushButton("Nach Updates suchen")
+            self.update_button.clicked.connect(self.check_updates)
+            left_layout.addWidget(self.update_button)
+
         left_layout.addWidget(self.status)
 
         right = QWidget()
@@ -217,6 +220,30 @@ class MainWindow(QMainWindow):
             self.status.setText(f"Favorit gespeichert: {channel.name}")
         save_favorites(self.favorites)
         self.refresh_channels()
+
+    def check_updates(self) -> None:
+        self.status.setText("Prüfe öffentliche GitHub-Veröffentlichungen …")
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        try:
+            release = check_latest_release()
+            if release is None:
+                QMessageBox.information(
+                    self, "Updates", "Es wurde noch keine öffentliche GitHub-Veröffentlichung gefunden."
+                )
+                self.status.setText("Keine veröffentlichte Version gefunden; die Update-Prüfung war erfolgreich.")
+                return
+            QMessageBox.information(
+                self, "Veröffentlichte Version",
+                f"Neueste Veröffentlichung: {release['tag_name']}\n\n"
+                f"{release.get('html_url', '')}\n\n"
+                "Die automatische Installation von Updates ist noch nicht implementiert."
+            )
+            self.status.setText(f"GitHub-Veröffentlichung gefunden: {release['tag_name']}")
+        except (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError) as exc:
+            QMessageBox.warning(self, "Update-Prüfung fehlgeschlagen", str(exc))
+            self.status.setText("GitHub-Update-Informationen sind derzeit nicht erreichbar.")
+        finally:
+            QApplication.restoreOverrideCursor()
 
     def _player_error(self, *_args) -> None:
         message = self.player.errorString() or "Der Stream kann mit dem aktuell verfügbaren Wiedergabemodul nicht abgespielt werden."
