@@ -78,3 +78,8 @@ Die technische Erreichbarkeit einer Playlist bedeutet nicht automatisch, dass al
 ## Projektstatus
 
 Früher Entwicklungsstand. Noch kein fertiges Installationspaket und keine verbindliche Freigabe für den späteren Produktnamen. Lizenzbedingungen für das Projekt müssen vor einer öffentlichen Codefreigabe bewusst festgelegt werden.
+
+
+### Wartung und spätere Kamerastreams
+
+Wartungsanzeigen dürfen die Video-/Kamerastream-Schnittstelle nicht blockieren. Eine spätere Kameraübertragung wird separat vom TV-Playlist-Wiedergabepfad umgesetzt; der zentrale Wartungsstatus darf keine aktive Medienwiedergabe pauschal stoppen. Die dedizierte Kamerafunktion ist noch nicht implementiert.
