@@ -44,19 +44,6 @@ Die folgenden Punkte sind festgehaltene Projektanforderungen, aber noch nicht vo
 - Serverseitige Registrierung und kontrollierte Beta-Gerätefreigabe mit kurzlebigem Bestätigungscode. Die Gerätekennung soll zufällig sein und keine Hardware-Seriennummer ableiten. Datenschutz, Rechtsgrundlage, Löschfristen und Sicherheitsmaßnahmen sind vor Live-Betrieb festzulegen.
 - Gemeinsame Status-, Wartungs- und Feedbackschnittstelle für beide Installationsvarianten; sie darf die lokale Wiedergabe nicht unnötig blockieren.
 
-### Testvideo und geschützte YouTube-Quelle – noch nicht umgesetzt
-
-Das einzelne Musikvideo, das derzeit für die Testversion vorgesehen ist, ist **ausschließlich ein Testinhalt**. Es darf nicht als regulärer Kataloginhalt oder als Freigabe für weitere Musikvideos verstanden werden.
-
-- Die aktuell hinterlegte YouTube-Quelle bzw. der zugehörige Kanal soll nur für ausdrücklich freigeschaltete Beta-Nutzer sichtbar und nutzbar sein.
-- Eine spätere Umsetzung muss die Berechtigung serverseitig prüfen; das bloße Ausblenden eines Links in der Oberfläche reicht nicht als Zugriffsschutz.
-- Die Wiedergabe ist nur für berechtigte Beta-Nutzer vorgesehen. FlemmauTV darf das Signal nicht als eigenen Stream weiterleiten, relayn, erneut ausstrahlen oder als ausgehenden Medienfeed bereitstellen.
-- Keine Aufzeichnung oder Weiterverbreitung des Testinhalts durch FlemmauTV. Vor der Nutzung sind die Nutzungsbedingungen und erforderlichen Rechte zu prüfen; die Regel darf keine YouTube-Schutzmaßnahmen umgehen.
-- Wenn die Beta-Freigabe fehlt, abgelaufen oder widerrufen ist, darf die geschützte Quelle nicht angezeigt oder abgespielt werden.
-- Diese Einschränkung gilt unabhängig von der allgemeinen TV-Sendersuche und einer möglichen späteren Twitch-/YouTube-Unterstützung für Live-Shows.
-
-**Status:** Anforderungen nachgetragen, noch nicht technisch umgesetzt oder getestet. Der vorhandene YouTube-Eintrag ist damit nicht automatisch geschützt; bis zur Umsetzung darf kein wirksamer Beta-Zugriffsschutz behauptet werden. Keine Versionsnummernänderung.
-
 ## Zentrale Service- und Rückmeldestelle
 
 Die zentrale Service-Komponente für **beide** Installationsvarianten ist als Backend-Grundlage im Ordner `service/` angelegt: HTTPS-API für Dienststatus und Meldungen, SQLite-Speicherung, Referenznummern und ein geschützter Betreiberbereich. Die Anwendung enthält außerdem eine gemeinsame Hilfe-/Rückmeldemaske. Sie bleibt bis zur Konfiguration einer echten öffentlichen HTTPS-Serveradresse bewusst deaktiviert, damit keine Meldung fälschlich als versendet gilt.
