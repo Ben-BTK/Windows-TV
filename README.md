@@ -80,11 +80,17 @@ Kostenloser Zugriff für Endnutzer bedeutet nicht automatisch, dass ein direkter
 
 Die Senderliste soll nach Bundesland, Landkreis und Ort durchsuchbar sein. Als erster Recherche-Schwerpunkt sind Sachsen-Anhalt, der Burgenlandkreis sowie angrenzende Regionen wie Altenburg und Gera vorgesehen. Danach soll die Recherche auf die übrigen Bundesländer ausgeweitet werden. Eine regionale Voreinstellung soll auswählbar und manuell änderbar sein; keine automatische Standortermittlung ist dafür vorausgesetzt.
 
-### Radio-Ausnahme – noch zu konkretisieren
+### Audio-Ausnahme für begleitende TV-Sendungen – noch nicht implementiert
 
-Radio gehört grundsätzlich nicht zum geplanten Senderkatalog. Der Nutzer hat jedoch eine Ausnahme von dieser Regel vorgesehen. Der konkrete Radiosender beziehungsweise Umfang dieser Ausnahme ist noch nicht benannt und muss vor einer Umsetzung ergänzt werden. Bis dahin werden keine Radiosender automatisch aufgenommen und keine Radiofunktion aktiviert.
+FlemmauTV erhält **keine allgemeine Radiofunktion und keine reguläre Radiosenderliste**. Eine eng begrenzte Ausnahme ist für TV-Sendungen vorgesehen, die zeitweise zusätzlich als Audio-/Radio-Livestream, Musikübertragung, Live-Auftritt, Podcast oder Gesprächsformat verfügbar sind. Als inhaltliches Beispiel dient ein Gesprächsformat wie *Riverboat*; das ist keine Bestätigung, dass dafür ein separater Radiostream existiert.
 
-**Status:** Recherche- und Planungspunkt; noch nicht als implementierte Funktion ansehen. Keine neuen Sender, Radioangebote oder Streams werden durch diese Dokumentationsänderung aktiviert.
+- Vorrang hat immer das offizielle TV-Angebot beziehungsweise der offizielle Anbieterplayer.
+- Eine ergänzende Audioübertragung darf nur als sendungsbezogene Option recherchiert werden, wenn sie vom offiziellen Anbieter angeboten wird und ihre Nutzung in FlemmauTV erlaubt ist.
+- Keine allgemeine Radiosuche, keine pauschale Aufnahme von Radiosendern und keine Umgehung von Bezahlschranken, DRM oder sonstigen Schutzmaßnahmen.
+- Wenn eine Sendung nur als Audio verfügbar ist, muss sie als Audioangebot erkennbar sein und darf nicht fälschlich als TV-Bildstream angezeigt werden.
+- Quelle, Verfügbarkeit, Zeitraum, Rechte und technische Einbindung sind pro Angebot zu prüfen.
+
+**Status:** Nur als Planungs- und Recherchepunkt vorgemerkt. Die Ausnahme aktiviert weder eine Radiofunktion noch neue Streams. Die Versionsnummer bleibt unverändert.
 
 ## Entwicklung
 
