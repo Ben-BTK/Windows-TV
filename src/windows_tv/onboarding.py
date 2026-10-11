@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 
 BASIS_TERMS_VERSION = "basis-0.1"
 STANDARD_TERMS_VERSION = "standard-0.1"
-DISPLAY_NAME_PATTERN = re.compile(r"^[\wÀ-ÖØ-öø-ÿ]+(?:[- ][\wÀ-ÖØ-öø-ÿ]+)?$", re.UNICODE)
+DISPLAY_NAME_PATTERN = re.compile(r"^[^\W\d_]+(?:[- ][^\W\d_]+)?$", re.UNICODE)
 # Common full names of public figures and prohibited slogans cannot be reliably
 # identified with a small offline list. Ambiguous cases require human review.
 BLOCKED_EXACT_NAMES = {
