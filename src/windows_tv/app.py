@@ -18,7 +18,8 @@ from windows_tv.playlist import Channel, load_playlist_file, parse_m3u
 from windows_tv.storage import load_favorites, save_favorites
 from windows_tv.update_checker import check_latest_release
 from windows_tv.service_status import central_service_base_url, fetch_service_status
-from windows_tv.variant import is_standard_variant
+from windows_tv.variant import is_standard_variant, current_variant
+from windows_tv.onboarding import ensure_initial_setup
 
 
 APP_TITLE = "Windows TV"
@@ -593,8 +594,11 @@ class MainWindow(QMainWindow):
 
 def main() -> int:
     app = QApplication(sys.argv)
-    app.setApplicationName("Windows TV")
+    app.setApplicationName("FlemmauTV")
     app.setOrganizationName("Ben-BTK")
+    settings = QSettings("Ben-BTK", APP_TITLE)
+    if not ensure_initial_setup(settings, current_variant()):
+        return 0
     window = MainWindow()
     window.show()
     return app.exec()
