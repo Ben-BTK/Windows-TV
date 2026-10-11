@@ -57,7 +57,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-tv-setup
+          name: FlemmauTV-Setup
           path: |
             dist/installer/*.exe
           if-no-files-found: error
