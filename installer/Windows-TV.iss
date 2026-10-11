@@ -1,6 +1,6 @@
-#define MyAppName "Windows TV"
+#define MyAppName "FlemmauTV"
 #define MyAppVersion "0.1.0"
-#define MyAppPublisher "Ben-BTK"
+#define MyAppPublisher "FlemmauTV / Ben-BTK"
 #define MyAppExeName "WindowsTV.exe"
 
 [Setup]
@@ -13,7 +13,7 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=admin
 OutputDir=..\dist\installer
-OutputBaseFilename=Windows-TV-Setup-{#MyAppVersion}
+OutputBaseFilename=FlemmauTV-Setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
