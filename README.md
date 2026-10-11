@@ -93,6 +93,15 @@ Die gemeinsame Maske für technische Störung, Kritik/Feedback und Funktionswuns
 
 Die technische Erreichbarkeit einer Playlist bedeutet nicht automatisch, dass alle darin verlinkten Inhalte zur Wiedergabe oder Weiterverbreitung freigegeben sind. Nutzer müssen erforderliche Rechte, Lizenzen und gültige Anbieterzugänge besitzen. FlemmauTV ist nicht dafür vorgesehen, Schutzmaßnahmen oder Bezahlschranken zu umgehen. Die Kompatibilität mit einer externen GitHub-Senderliste muss vor einer Integration technisch und anhand der Lizenzbedingungen geprüft werden.
 
+
+## Festgehaltene Anforderungen für die nächsten Updates
+
+Die besprochenen Anforderungen an die Setup-EXE als technische Basis, sicheres Nachladen des eigentlichen Moduls, Update-Suche beim Online-Start, automatische Updates ausschließlich zwischen 01:00 und 04:00 Uhr, Player-Größe/Vollbild, Testvideo, Tastatursteuerung, Bildschirmaufnahme-Schutz mit Ausnahme für Webcam-/Überwachungsmodus sowie abgestufte Nutzungs- und Änderungsbestätigungen sind gesammelt in:
+
+**[Produktanforderungen für die nächsten Updates](docs/PRODUKTANFORDERUNGEN-NAECHSTE-UPDATES.md)**
+
+Diese Liste ist ein verbindliches Konzept für die weitere Planung, aber kein Beleg, dass die Funktionen bereits implementiert sind. Bei dieser Dokumentationsänderung wird keine Versionsnummer geändert. Heruntergeladene ausführbare Komponenten dürfen künftig nur nach authentischer Herkunfts- und Integritätsprüfung installiert bzw. ausgeführt werden. Designupdates können intern separat nachverfolgt werden, auch wenn die sichtbare Produktversionsnummer bei einem reinen Designupdate unverändert bleiben soll.
+
 ## Projektstatus
 
 Früher Entwicklungsstand. Der Produktname **FlemmauTV** ist festgelegt. Der GitHub-Repository-Pfad lautet aktuell weiterhin `Windows-TV`; ein tatsächliches Umbenennen des Repositorys ist ein separater GitHub-Schritt. Noch kein fertiges Installationspaket und keine produktive öffentliche Service-Homepage. Lizenzbedingungen für das Projekt müssen vor einer öffentlichen Codefreigabe bewusst festgelegt werden.
