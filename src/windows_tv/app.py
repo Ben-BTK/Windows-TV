@@ -592,6 +592,69 @@ class MainWindow(QMainWindow):
         )
 
 
+    def keyPressEvent(self, event) -> None:
+        """Convenient TV-style keyboard controls; never intercept text editing."""
+        from PySide6.QtWidgets import QLineEdit, QTextEdit, QComboBox
+        focus = self.focusWidget()
+        if isinstance(focus, (QLineEdit, QTextEdit, QComboBox)):
+            super().keyPressEvent(event)
+            return
+        key = event.key()
+        if key == Qt.Key.Key_Escape:
+            self.player.stop()
+            self.now_playing.setText("Startseite – kein Sender ausgewählt")
+            self.status.setText("Zur Startseite zurückgekehrt.")
+            event.accept()
+            return
+        if key == Qt.Key.Key_F5:
+            if self.current_channel:
+                self.player.stop()
+                self.player.setSource(QUrl(self.current_channel.url))
+                self.player.play()
+                self.status.setText("Aktueller Sender wird neu geladen …")
+            event.accept()
+            return
+        if key == Qt.Key.Key_F7:
+            QMessageBox.information(
+                self, "FlemmauTV – Tastaturhilfe",
+                "↑ / ↓: vorheriger/nächster Sender\n"
+                "← / →: Lautstärke leiser/lauter\n"
+                "0–9: Sendernummer eingeben (Senderliste)\n"
+                "F5: aktuellen Sender neu laden\n"
+                "F7: diese Hilfe\n"
+                "F11: Vollbild umschalten\n"
+                "Esc: zurück zur Startseite"
+            )
+            event.accept()
+            return
+        if key == Qt.Key.Key_F11:
+            self.showNormal() if self.isFullScreen() else self.showFullScreen()
+            event.accept()
+            return
+        if key in (Qt.Key.Key_Up, Qt.Key.Key_Down):
+            count = self.channel_list.count()
+            if count:
+                current = self.channel_list.currentRow()
+                delta = -1 if key == Qt.Key.Key_Up else 1
+                self.channel_list.setCurrentRow((max(current, 0) + delta) % count)
+                self.play_selected()
+            event.accept()
+            return
+        if key in (Qt.Key.Key_Left, Qt.Key.Key_Right):
+            volume = self.audio.volume()
+            self.audio.setVolume(max(0.0, min(1.0, volume + (-0.05 if key == Qt.Key.Key_Left else 0.05))))
+            self.status.setText(f"Lautstärke: {round(self.audio.volume() * 100)} %")
+            event.accept()
+            return
+        if key in (Qt.Key.Key_Delete,):
+            self.player.stop()
+            self.now_playing.setText("Startseite – kein Sender ausgewählt")
+            self.status.setText("Wiedergabe beendet.")
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+
 def main() -> int:
     app = QApplication(sys.argv)
     app.setApplicationName("FlemmauTV")
