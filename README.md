@@ -56,6 +56,36 @@ Die Basisinstallation soll diese Service-Schnittstelle erreichen können, ohne e
 
 Die erste maschinenlesbare Anbieterschnittstelle ist unter `GET /api/providers` und `GET /api/providers/{provider_id}` im Backend angelegt. Sie dient der App und internen Planung; dafür ist keine Homepage vorgesehen. Sie listet vorhandene und geplante Quellen mit einem klaren Status. Disney+, Netflix, Sky, MagentaTV, Joyn und Apple TV sind derzeit nur als geplant gekennzeichnet und noch nicht integriert. Details: [docs/ANBIETER-KATALOG-API.md](docs/ANBIETER-KATALOG-API.md).
 
+## TV-Senderkatalog, Regionalfernsehen und Radio-Ausnahme
+
+Für die weitere Planung wird ein möglichst umfangreicher Katalog audiovisueller TV-Angebote vorgesehen. Es gibt keine künstliche feste Obergrenze für die Anzahl der Sender. Berücksichtigt werden können unter anderem:
+
+- öffentlich-rechtliche nationale und regionale TV-Angebote, einschließlich regionaler Varianten von ARD-Anstalten wie MDR, rbb, hr, NDR, WDR, BR, SWR, SR und Radio Bremen (nur deren TV-Angebote);
+- frei empfangbare private und Sparten-TV-Sender, beispielsweise DMAX, ProSieben MAXX, Disney Channel, Nickelodeon und TOGGO/SUPER RTL;
+- lokale und regionale Fernsehveranstalter, Stadt- und Landkreisfernsehen sowie Bürgermedien, beispielsweise als zu prüfende Kandidaten BLK regional TV, altenburg.tv und Angebote aus dem Raum Altenburg/Gera;
+- weitere geeignete TV-Streams und audiovisuelle Angebote, sofern Quelle, Verfügbarkeit und Nutzungsrechte geprüft werden können.
+
+### Prüfung und Freigabestatus
+
+Jeder Kandidat soll getrennt dokumentiert werden: Sendername, Betreiber, Land/Bundesland/Region, offizielle Website, Empfangsweg, Stream- oder Player-Art, Datum der Funktionsprüfung, Nutzungsbedingungen und Einbindungsrechte. Vorgesehene Statuswerte:
+
+- **Bestätigt:** Quelle und Empfangsweg wurden geprüft.
+- **Einbindung erlaubt:** Die konkrete Nutzung in FlemmauTV ist durch eine offizielle Quelle oder klare Nutzungsbedingungen abgedeckt.
+- **Zu prüfen:** kostenloses Anschauen ist möglich oder wahrscheinlich, die Einbindung in FlemmauTV ist aber noch nicht geklärt.
+- **Nicht geeignet:** Quelle, technische Verfügbarkeit oder Nutzungsrechte reichen nicht aus.
+
+Kostenloser Zugriff für Endnutzer bedeutet nicht automatisch, dass ein direkter Stream technisch übernommen oder in eine andere Anwendung eingebettet werden darf. Offizielle Player, externe Links und direkte Streams sind daher getrennt zu behandeln. DRM, Bezahlschranken, Geo-Beschränkungen oder sonstige Schutzmaßnahmen dürfen nicht umgangen werden.
+
+### Regionale Zuordnung
+
+Die Senderliste soll nach Bundesland, Landkreis und Ort durchsuchbar sein. Als erster Recherche-Schwerpunkt sind Sachsen-Anhalt, der Burgenlandkreis sowie angrenzende Regionen wie Altenburg und Gera vorgesehen. Danach soll die Recherche auf die übrigen Bundesländer ausgeweitet werden. Eine regionale Voreinstellung soll auswählbar und manuell änderbar sein; keine automatische Standortermittlung ist dafür vorausgesetzt.
+
+### Radio-Ausnahme – noch zu konkretisieren
+
+Radio gehört grundsätzlich nicht zum geplanten Senderkatalog. Der Nutzer hat jedoch eine Ausnahme von dieser Regel vorgesehen. Der konkrete Radiosender beziehungsweise Umfang dieser Ausnahme ist noch nicht benannt und muss vor einer Umsetzung ergänzt werden. Bis dahin werden keine Radiosender automatisch aufgenommen und keine Radiofunktion aktiviert.
+
+**Status:** Recherche- und Planungspunkt; noch nicht als implementierte Funktion ansehen. Keine neuen Sender, Radioangebote oder Streams werden durch diese Dokumentationsänderung aktiviert.
+
 ## Entwicklung
 
 Voraussetzung: Python 3.11 oder neuer.
